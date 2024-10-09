@@ -2,11 +2,12 @@
 #define MAT_H
 
 #include<iostream>
-#include <stdexcept>
-#include <iomanip>
+#include<stdexcept>
+#include<iomanip>
 #include<functional>
-#include <type_traits>
+#include<type_traits>
 #include<math.h>
+#include<set>
 
 #include"dict.h"
 #include"managed.h"
@@ -78,7 +79,15 @@ public:
     Mat<T>        operator+        (const T& rhs)                                 const;
     Mat<T>        operator-        (const T& rhs)                                 const;
     Mat<T>        operator*        (const T& rhs)                                 const;                                 
-    Mat<T>        operator/        (const T& rhs)                                 const;                              
+    Mat<T>        operator/        (const T& rhs)                                 const;
+    void          operator+=       (const Mat<T>& rhs)                            const; 
+    void          operator-=       (const Mat<T>& rhs)                            const; 
+    void          operator*=       (const Mat<T>& rhs)                            const;
+    void          operator/=       (const Mat<T>& rhs)                            const; 
+    Mat<T>        operator+        (const Mat<T>& rhs)                            const;
+    Mat<T>        operator-        (const Mat<T>& rhs)                            const;
+    Mat<T>        operator*        (const Mat<T>& rhs)                            const;                                 
+    Mat<T>        operator/        (const Mat<T>& rhs)                            const;                         
 	T& 			  iloc		       (const size_t i, const size_t j)					    { refresh(); return data[i][j]; }
 	const T&	  iloc		       (const size_t i, const size_t j)               const { return data[i][j]; }
     Mat<T>        iloc_row         (const size_t i)                               const { return extract_rows(i,i+1); }
@@ -104,6 +113,12 @@ public:
 	Mat<string>	  extract_colNames (const size_t startCol, const size_t endCol)   const;
 	Mat<string>	  extract_rowNames ()										      const { return extract_rowNames(0, rowSize); }
 	Mat<string>	  extract_colNames ()                                             const { return extract_colNames(0, colSize); }
+    void          drop_rows        (const size_t startRow, const size_t endRow);
+    void          drop_columns     (const size_t startCol, const size_t endCol);
+    void          drop_rows        (const set<size_t>& rows);
+    void          drop_columns     (const set<size_t>& cols);
+    void          drop_row         (const size_t i);
+    void          drop_column      (const size_t i);
 	void		  transpose		   ();
 	void		  dot              (const Mat<T>& other);
 	void          concat_horizontal(const Mat<T>& other);
@@ -242,7 +257,7 @@ void Mat<T>::operator=(const Mat<T>& other) {
 // 	if (this == &other) return;
 // }
 template<typename T>
-void Mat<T>::operator+= (const T& rhs)
+void Mat<T>::operator+=(const T& rhs)
 {
     for(size_t i = 0; i < rowSize; ++i)
         for(size_t j = 0; j < colSize; ++j)
@@ -250,7 +265,7 @@ void Mat<T>::operator+= (const T& rhs)
     refresh();
 }
 template<typename T>
-void Mat<T>::operator-= (const T& rhs)
+void Mat<T>::operator-=(const T& rhs)
 {
     for(size_t i = 0; i < rowSize; ++i)
         for(size_t j = 0; j < colSize; ++j)
@@ -258,7 +273,7 @@ void Mat<T>::operator-= (const T& rhs)
     refresh();
 }
 template<typename T>
-void Mat<T>::operator*= (const T& rhs)
+void Mat<T>::operator*=(const T& rhs)
 {
     for(size_t i = 0; i < rowSize; ++i)
         for(size_t j = 0; j < colSize; ++j)
@@ -266,7 +281,7 @@ void Mat<T>::operator*= (const T& rhs)
     refresh();
 }
 template<typename T>
-void Mat<T>::operator/= (const T& rhs)
+void Mat<T>::operator/=(const T& rhs)
 {
     for(size_t i = 0; i < rowSize; ++i)
         for(size_t j = 0; j < colSize; ++j)
@@ -274,32 +289,96 @@ void Mat<T>::operator/= (const T& rhs)
     refresh();
 }
 template<typename T>
-Mat<T> Mat<T>::operator+ (const T& rhs) const
+Mat<T> Mat<T>::operator+(const T& rhs) const
 {
     Mat<T> lhs(*this);
     lhs += rhs;
     return lhs;
 }
 template<typename T>
-Mat<T> Mat<T>::operator- (const T& rhs) const
+Mat<T> Mat<T>::operator-(const T& rhs) const
 {
     Mat<T> lhs(*this);
     lhs -= rhs;
     return lhs;
 }
 template<typename T>
-Mat<T> Mat<T>::operator* (const T& rhs) const 
+Mat<T> Mat<T>::operator*(const T& rhs) const 
 {
     Mat<T> lhs(*this);
     lhs *= rhs;
     return lhs;
 }
 template<typename T>                              
-Mat<T> Mat<T>::operator/ (const T& rhs) const 
+Mat<T> Mat<T>::operator/(const T& rhs) const 
 {
     Mat<T> lhs(*this);
     lhs /= rhs;
     return lhs;
+}
+template<typename T>
+void Mat<T>::operator+=(const Mat<T>& rhs) const
+{
+    if(rowSize!=rhs.size_row() || colSize!=rhs.size_column())
+      throw invalid_argument("Error: Matrix dimensions must match for this operation.");
+    for(size_t i = 0; i < rowSize; ++i)
+        for(size_t j =0; j < colSize; ++j)
+            data[i][j] += rhs.iloc(i,j);
+}
+template<typename T>
+void Mat<T>::operator-= (const Mat<T>& rhs) const
+{
+    if(rowSize != rhs.size_row() || colSize != rhs.size_column())
+        throw invalid_argument("Error: Matrix dimensions must match for this operation.");
+    for(size_t i = 0; i < rowSize; ++i)
+        for(size_t j =0; j < colSize; ++j)
+            data[i][j] -= rhs.iloc(i,j);
+}
+template<typename T>
+void Mat<T>::operator*= (const Mat<T>& rhs) const
+{
+    if(rowSize!=rhs.size_row() || colSize!=rhs.size_column())
+      throw invalid_argument("Error: Matrix dimensions must match for this operation.");
+    for(size_t i = 0; i < rowSize; ++i)
+        for(size_t j =0; j < colSize; ++j)
+            data[i][j] *= rhs.iloc(i,j);
+}
+template<typename T>
+void Mat<T>::operator/= (const Mat<T>& rhs) const
+{
+    if(rowSize!=rhs.size_row() || colSize!=rhs.size_column())
+      throw invalid_argument("Error: Matrix dimensions must match for this operation.");
+    for(size_t i = 0; i < rowSize; ++i)
+        for(size_t j =0; j < colSize; ++j)
+            data[i][j] /= rhs.iloc(i,j);
+}
+template<typename T>
+Mat<T> Mat<T>::operator+(const Mat<T>& rhs) const
+{
+    Mat<T> ret(*this);
+    ret += rhs;
+    return ret;
+}
+template<typename T>
+Mat<T> Mat<T>::operator-(const Mat<T>& rhs) const
+{
+    Mat<T> ret(*this);
+    ret -= rhs;
+    return ret;
+}
+template<typename T>
+Mat<T> Mat<T>::operator*(const Mat<T>& rhs) const
+{
+    Mat<T> ret(*this);
+    ret *= rhs;
+    return ret;
+}                             
+template<typename T>
+Mat<T> Mat<T>::operator/(const Mat<T>& rhs) const
+{
+    Mat<T> ret(*this);
+    ret /= rhs;
+    return ret;
 }
 template<typename T>
 T& Mat<T>::loc(const string& rowName, const string& colName)
@@ -411,6 +490,89 @@ Mat<string>	Mat<T>::extract_colNames(const size_t startCol, const size_t endCol)
 	return mat;
 }
 template<typename T>
+void Mat<T>::drop_rows(const size_t startRow, const size_t endRow)
+{
+    if(startRow >= rowSize || startRow < 0)
+        throw out_of_range("Error: Start row index is out of bounds.");
+    if(endRow > rowSize || endRow < 0)
+        throw out_of_range("Error: End row index is out of bounds.");
+    if(startRow == endRow) return;
+    size_t new_rowSize   = rowSize-endRow+startRow;
+    T** new_data         = new T*[new_rowSize];
+    string* new_rowNames = new string[new_rowSize];
+    for(size_t i = 0; i < startRow; ++i)
+    {
+        new_data[i]     = data[i];
+        data[i]         = nullptr;
+        new_rowNames[i] = rowNames[i];
+    }
+    for(size_t i = startRow; i < endRow; ++i)
+    {
+        delete data[i];
+    }
+    for(size_t i = endRow; i < rowSize; ++i)
+    {
+        new_data[i-endRow+startRow]     = data[i];
+        data[i]                         = nullptr;
+        new_rowNames[i-endRow+startRow] = rowNames[i];
+    }
+    delete[] data;
+    delete[] rowNames;
+    data     = new_data;
+    rowNames = new_rowNames;
+    rowSize  = new_rowSize;
+    refresh();
+}
+template<typename T>
+void Mat<T>::drop_columns(const size_t startCol, const size_t endCol)
+{
+    if (startCol >= colSize || startCol < 0)
+        throw out_of_range("Error: Start column index is out of bounds.");
+    if (endCol > colSize || endCol < 0)
+        throw out_of_range("Error: End column index is out of bounds.");
+    if (startCol == endCol) return;
+    size_t new_colSize = colSize - endCol + startCol;
+    T** new_data         = new T*[rowSize];
+    string* new_colNames = new string*[new_colSize];
+    for(size_t i = 0; i < rowSize; ++i)
+    {
+        new_data[i] = new T[new_colSize];
+        for(size_t j = 0; j < startCol; ++j)
+            new_data[i][j] = data[i][j];
+        for(size_t j = endCol; j < colSize; ++j)
+            new_data[i][j-endCol+startCol] = data[i][j];
+        delete[] data[i];
+    }
+    for(size_t j = 0; j < startCol; ++j)
+        new_colNames[j] = colNames[j];
+    for(size_t j = endCol; j < colSize; ++j)
+        new_colNames[j-endCol+startCol] = colNames[j];
+    delete[] colNames;
+    colNames = new_colNames;
+    colSize  = new_colSize;
+    refresh();
+}
+template<typename T>
+void Mat<T>::drop_rows(const set<size_t>& rows)
+{
+    // soon...
+}
+template<typename T>
+void Mat<T>::drop_columns(const set<size_t>& cols)
+{
+    // soon...
+}
+template<typename T>
+void Mat<T>::drop_row(const size_t i)
+{
+    // soon...
+}
+template<typename T>
+void Mat<T>::drop_column(const size_t i)
+{
+    // soon...
+}
+template<typename T>
 void Mat<T>::transpose()
 {
 	T** new_data = new T * [colSize];
@@ -462,7 +624,7 @@ void Mat<T>::concat_horizontal(const Mat<T>& other)
     if (rowSize != other.rowSize)
         throw invalid_argument("Row sizes must be equal for horizontal concatenation.");
 	T**     new_data     = new T * [rowSize];
-	size_t  new_colSize  = rowSize + other.rowSize;
+	size_t  new_colSize  = colSize + other.colSize;
 	string* new_colNames = new string[new_colSize];
 	for (size_t i = 0; i < rowSize; ++i)
 	{
@@ -600,7 +762,8 @@ template<typename T>
 Mat<T> dot(const Mat<T>& lhs, const Mat<T>& rhs)
 {
 	Mat<T> ret(lhs);
-	return ret.dot(rhs);
+	ret.dot(rhs);
+    return ret;
 }
 template<typename T> 
 Mat<T> concat_horizontal(const Mat<T>& left, const Mat<T>& right)
@@ -696,22 +859,22 @@ void display_rainbow(const Mat<T> mat, WITH_WHICH_NAME withWhichName)
 }
 #pragma region friend functions
 template<typename T> 
-Mat<T> operator+ (const T& lhs, const Mat<T>& mat)
+Mat<T> operator+(const T& lhs, const Mat<T>& mat)
 {
     return mat + lhs;
 }
 template<typename T>
-Mat<T> operator- (const T& lhs, const Mat<T>& mat)
+Mat<T> operator-(const T& lhs, const Mat<T>& mat)
 {
     return mat - lhs;
 }
 template<typename T>
-Mat<T> operator* (const T& lhs, const Mat<T>& mat)
+Mat<T> operator*(const T& lhs, const Mat<T>& mat)
 {
     return mat * lhs;
 }
 template<typename T>
-Mat<T> operator/ (const T& lhs, const Mat<T>& mat)
+Mat<T> operator/(const T& lhs, const Mat<T>& mat)
 {
     return mat / lhs;
 }

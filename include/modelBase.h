@@ -1,6 +1,7 @@
 #ifndef MODELBASE_H
 #define MODELBASE_H
 
+#include"managed.h"
 #include"mat.h"
 
 using namespace std;
@@ -14,21 +15,22 @@ using namespace std;
 template<class T>
 class RegressionModelBase
 {
-private:
-	RegressionModelBase();
+protected:
+	RegressionModelBase(){};
 
 // * * * * * * * functions * * * * * * *
 public:
-	virtual void   train  (const Mat<T>& x, const Mat<T>& y) = 0;
-	virtual Mat<T> predict(const Mat<T>& x) const			 = 0;
-private:
+	virtual void    train  (const Mat<T>& x, const Mat<T>& y) = 0;
+	virtual Mat<T>  predict(const Mat<T>& x) const			  = 0;
+    virtual Dict<T> get_trainedParameters()  const            = 0;
+protected:
 	template<typename Y>
 	void           record (ManagedVal<Y>& managedVal, const Y& val) const;
 
 // * * * * * * * attributes * * * * * * *
-protected:
+public:
 	mutable bool		isRefreshed = true;
-	const Administrator administor;
+	const Administrator administrator;
 };
 
 #pragma region function definition
@@ -51,20 +53,21 @@ void RegressionModelBase<T>::record(ManagedVal<Y>& managedVal, const Y& val) con
 template<class T>
 class ClassificationModelBase
 {
-private:
-	ClassificationModelBase();
+protected:
+	ClassificationModelBase(){};
 
 // * * * * * * * functions * * * * * * *
 public:
 	virtual void		train  (const Mat<T>& x, const Mat<string>& y) = 0;
 	virtual Mat<string> predict(const Mat<T>& x) const			       = 0;
-private:
+protected:
 	template<typename Y>
-	void           record(ManagedVal<Y>& managedVal, const Y& val) const;
+	void                record(ManagedVal<Y>& managedVal, const Y& val) const;
+
 // * * * * * * * attributes * * * * * * *
 protected:
 	mutable bool		isRefreshed = true;
-	const Administrator administor;
+	const Administrator administrator;
 };
 
 #pragma region function definition
@@ -72,8 +75,9 @@ protected:
 template<typename T> template<typename Y>
 void ClassificationModelBase<T>::record(ManagedVal<Y>& managedVal, const Y& val) const
 {
-	ForceWrite<Y>(administrator, managedVal, val);
-	SetPermission(administrator, managedVal, PERMISSION_READ);
+	SetPermission(administrator, managedVal, PERMISSION_WRITE);
+    managedVal.write(val);
+    SetPermission(administrator, managedVal, PERMISSION_READ);
 	isRefreshed = false;
 }
 #pragma endregion
