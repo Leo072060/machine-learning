@@ -211,9 +211,11 @@ CMakeFiles/ML.dir/src/main.cpp.o: /home/twh/machineLearning/src/main.cpp \
  /usr/include/c++/11/tr1/modified_bessel_func.tcc \
  /usr/include/c++/11/tr1/poly_hermite.tcc \
  /usr/include/c++/11/tr1/poly_laguerre.tcc \
- /usr/include/c++/11/tr1/riemann_zeta.tcc \
+ /usr/include/c++/11/tr1/riemann_zeta.tcc /usr/include/c++/11/set \
+ /usr/include/c++/11/bits/stl_tree.h /usr/include/c++/11/bits/stl_set.h \
+ /usr/include/c++/11/bits/stl_multiset.h \
  /home/twh/machineLearning/include/dict.h /usr/include/c++/11/map \
- /usr/include/c++/11/bits/stl_tree.h /usr/include/c++/11/bits/stl_map.h \
+ /usr/include/c++/11/bits/stl_map.h \
  /usr/include/c++/11/bits/stl_multimap.h \
  /home/twh/machineLearning/include/managed.h /usr/include/c++/11/memory \
  /usr/include/c++/11/bits/stl_raw_storage_iter.h \
@@ -224,4 +226,12 @@ CMakeFiles/ML.dir/src/main.cpp.o: /home/twh/machineLearning/src/main.cpp \
  /usr/include/c++/11/backward/auto_ptr.h \
  /usr/include/c++/11/pstl/glue_memory_defs.h \
  /usr/include/c++/11/pstl/execution_defs.h \
+ /home/twh/machineLearning/include/numatrix.h \
+ /home/twh/machineLearning/include/linearModel.h \
+ /usr/include/c++/11/random /usr/include/c++/11/bits/random.h \
+ /usr/include/x86_64-linux-gnu/c++/11/bits/opt_random.h \
+ /usr/include/c++/11/bits/random.tcc /usr/include/c++/11/numeric \
+ /usr/include/c++/11/bits/stl_numeric.h \
+ /usr/include/c++/11/pstl/glue_numeric_defs.h \
+ /home/twh/machineLearning/include/modelBase.h \
  /home/twh/machineLearning/include/numatrix.h
