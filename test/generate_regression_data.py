@@ -5,13 +5,13 @@ import numpy as np
 np.random.seed(42)
 
 # 生成数据
-num_samples = 100
+num_samples = 10000
 feature1 = np.random.rand(num_samples) * 100  # 特征1
 feature2 = np.random.rand(num_samples) * 50   # 特征2
 noise = np.random.randn(num_samples) * 10      # 随机噪声
 
 # 生成目标变量（假设目标是特征1和特征2的线性组合加上噪声）
-target = 3 * feature1 + 2 * feature2 + noise
+target = 3 * feature1 + 9 * feature2 + noise
 
 # 创建DataFrame
 data = pd.DataFrame({

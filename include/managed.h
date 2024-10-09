@@ -122,14 +122,14 @@ private:
 template<typename T>
 const T& ManagedVal<T>::read() const
 {
-	if (check_permission(PERMISSION_READ))
+	if (!check_permission(PERMISSION_READ))
 		throw runtime_error("Error: Insufficient permissions for read operation.");
 	return *value;
 }
 template<typename T>
 void ManagedVal<T>::write(const T& val)
 {
-	if (check_permission(PERMISSION_WRITE))
+	if (!check_permission(PERMISSION_WRITE))
 		throw runtime_error("Error: Insufficient permissions for write operation.");
 	value = make_unique<T>(val);
 }

@@ -117,9 +117,9 @@ public:
 // * * * * * * * attributes * * * * * * *
 public:
 	// model parameters
-	double learning_rate = 0.05;
-	size_t batch_size = 10;
-	size_t iterations = 700;
+	double learning_rate = 0.0005;
+	size_t batch_size = 100;
+	size_t iterations = 7000;
 private:
 	// calculated value
 	ManagedVal<Mat<T>> THETAS;
@@ -142,7 +142,7 @@ void LinearRegression<T>::train(const Mat<T>& x, const Mat<T>& y)
     Mat<T> w = concat_horizontal(x,ones);
     Mat<T> thetas(1,x.size_column()+1);
 
-    // 
+    // start training
     for(size_t i = 0; i < iterations; ++i)
     {
     // generate random numbers

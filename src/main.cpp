@@ -26,6 +26,7 @@ int main()
     LinearRegression<double> model;
     model.train(x,y);
     auto ret = model.get_trainedParameters();
-    cout<<ret["theta1"];
+    cout<<"theta0 : "<<ret["theta0"]<<endl;
+    cout<<"theta0 : "<<ret["theta1"]<<endl;
     return 0;
 }
