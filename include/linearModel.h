@@ -3,8 +3,10 @@
 
 #include<stdexcept> 
 #include<vector>
+#include<random>
+#include<set>
 
-#include"modelBase.h"
+#include "modelBase.h"
 #include"managed.h"
 #include"numatrix.h"
 #include"dict.h"
@@ -133,7 +135,36 @@ void LinearRegression<T>::train(const Mat<T>& x, const Mat<T>& y)
 	if (x.size_row() < 1)
 		throw invalid_argument("Error: Matrix x must have at least one row.");
 
-	
+    Mat<T> ones(x.size_row(),1);
+    for(size_t i = 0; i < x.size_row(); ++i) ones.iloc(i,0) = 1;
+    Mat<T> w = concat_horizontal(x,ones);
+    Mat<T> thetas(1,x.size_column());
+
+    // 
+    for(size_t i = 0; i < iterations; ++i)
+    {
+    // generate random numbers
+    set<size_t> randomNums;
+    random_device rd;
+    mt19937 gen(rd()); 
+    uniform_int_distribution<> dis(0, x.size_row()-1);
+    while (randomNums.size() < batch_size) 
+        randomNums.insert(dis(gen)); 
+    
+    Mat<T> tmp_thetas(thetas);
+
+    for(size_t i = 0; i < x.size_column(); ++i)
+    {
+        tmp_theta_i = 0;
+        for(auto& e:randomNums)
+        {
+            tmp_theta_i += learning_rate*((y.iloc_row(e) - det(x.iloc_row(e),transpose(theta))) * x.iloc(e,i)).iloc(0,0);
+        }
+        tmp_theta.iloc(i) += (tmp_theta_i/batch_size);
+    }
+    thetas = tmp_theta;
+    }
+    record(THETAS,thetas);
 }
 template<typename T>
 Mat<T> LinearRegression<T>::predict(const Mat<T>& x) const
@@ -141,7 +172,7 @@ Mat<T> LinearRegression<T>::predict(const Mat<T>& x) const
 	if (x.size_column() != 1)
 		throw invalid_argument("Error: Input matrix x must be a single-column matrix for prediction.");
 	Mat<T> y(1, x.size_row);
-	for (size_t i = 0; i < x.size_row; ++i)
+	for (size_t i = 0; i < x.size_row(); ++i)
 		y.iloc(i, 0) = x.iloc(i, 0) * W.read() + B.read();
 	return y;
 }

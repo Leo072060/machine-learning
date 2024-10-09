@@ -49,7 +49,8 @@ int main()
       tmp.concat_vertical(U);
 
       display_rainbow(tmp);
-
+    tmp *=10;
+    display_rainbow(tmp+55);
 
       system("pause"); 
     return 0;

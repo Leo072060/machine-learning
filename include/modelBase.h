@@ -24,7 +24,7 @@ public:
 private:
 	template<typename Y>
 	void           record (ManagedVal<Y>& managedVal, const Y& val) const;
-    
+
 // * * * * * * * attributes * * * * * * *
 protected:
 	mutable bool		isRefreshed = true;
@@ -36,8 +36,9 @@ protected:
 template<typename T> template<typename Y>
 void RegressionModelBase<T>::record(ManagedVal<Y>& managedVal, const Y& val) const
 {
-	ForceWrite<Y>(administrator, managedVal, val);
-	SetPermission(administrator, managedVal, PERMISSION_READ);
+	SetPermission(administrator, managedVal, PERMISSION_WRITE);
+    managedVal.write(val);
+    SetPermission(administrator, managedVal, PERMISSION_READ);
 	isRefreshed = false;
 }
 #pragma endregion

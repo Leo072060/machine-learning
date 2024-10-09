@@ -36,17 +36,23 @@ namespace P
 {
 	template<typename T> size_t CountSwaps(const Mat<T>& P);
 }
-template<typename T> Mat<T>&      transpose       (const Mat<T>& mat);
-template<typename T> Mat<T>&      dot             (const Mat<T>& lhs, const Mat<T>& rhs);
-template<typename T> void         display         (const Mat<T> mat, WITH_WHICH_NAME withWhichName = WITHOUT_NAME);
-template<typename T> void         display_rainbow (const Mat<T> mat, WITH_WHICH_NAME withWhichName = WITHOUT_NAME);
+template<typename T> Mat<T>       transpose        (const Mat<T>& mat);
+template<typename T> Mat<T>       dot              (const Mat<T>& lhs, const Mat<T>& rhs);
+template<typename T> Mat<T>       concat_horizontal(const Mat<T>& left, const Mat<T>& right);
+template<typename T> Mat<T>       concat_vertical  (const Mat<T>& top, const Mat<T>& bottom);
+template<typename T> void         display          (const Mat<T> mat, WITH_WHICH_NAME withWhichName = WITHOUT_NAME);
+template<typename T> void         display_rainbow  (const Mat<T> mat, WITH_WHICH_NAME withWhichName = WITHOUT_NAME);
 #pragma region friend functions
-template<typename T> Dict<Mat<T>> LU              (const Mat<T>& mat);
-template<typename T> T            det             (const Mat<T>& mat);
-template<typename T> T            det_LU          (const Mat<T>& mat);
-template<typename T> T            det_inversion   (const Mat<T>& mat);
-template<typename T> Mat<T>       inv             (const Mat<T>& mat);
-template<typename T> Mat<T>       inv_Gauss_Jordan(const Mat<T>& mat);
+template<typename T> Mat<T>       operator+        (const T& lhs, const Mat<T>& mat);
+template<typename T> Mat<T>       operator-        (const T& lhs, const Mat<T>& mat);
+template<typename T> Mat<T>       operator*        (const T& lhs, const Mat<T>& mat);
+template<typename T> Mat<T>       operator/        (const T& lhs, const Mat<T>& mat);
+template<typename T> Dict<Mat<T>> LU               (const Mat<T>& mat);
+template<typename T> T            det              (const Mat<T>& mat);
+template<typename T> T            det_LU           (const Mat<T>& mat);
+template<typename T> T            det_inversion    (const Mat<T>& mat);
+template<typename T> Mat<T>       inv              (const Mat<T>& mat);
+template<typename T> Mat<T>       inv_Gauss_Jordan (const Mat<T>& mat);
 #pragma endregion
 #pragma endregion
 #pragma endregion
@@ -65,8 +71,18 @@ public:
 // * * * * * * * functions * * * * * * * 
 	void		  operator=	       (const Mat<T>& other);
 	// void		  operator=        (Mat<T>&& other) noexcept;
+    void          operator+=       (const T& rhs);
+    void          operator-=       (const T& rhs);
+    void          operator*=       (const T& rhs);
+    void          operator/=       (const T& rhs);
+    Mat<T>        operator+        (const T& rhs)                                 const;
+    Mat<T>        operator-        (const T& rhs)                                 const;
+    Mat<T>        operator*        (const T& rhs)                                 const;                                 
+    Mat<T>        operator/        (const T& rhs)                                 const;                              
 	T& 			  iloc		       (const size_t i, const size_t j)					    { refresh(); return data[i][j]; }
 	const T&	  iloc		       (const size_t i, const size_t j)               const { return data[i][j]; }
+    Mat<T>        iloc_row         (const size_t i)                               const { return extract_rows(i,i+1); }
+    Mat<T>        iloc_column      (const size_t i)                               const { return extract_columns(i,i+1); }
 	T&			  loc			   (const string& rowName, const string& colName);
 	const T&	  loc			   (const string& rowName, const string& colName) const;
 	string&		  iloc_rowName     (const size_t& i)								    { return rowNames[i]; }
@@ -78,14 +94,14 @@ public:
 	void          clear_colNames   ();
 	size_t		  size_row	       ()                                             const { return rowSize; }
 	size_t		  size_column	   ()                                             const { return colSize; }
-	void		  swap_rows	       (size_t a, size_t b);
-	void		  swap_columns     (size_t a, size_t b);
-	Mat<T>        extract          (size_t startRow, size_t startCol, 
-								    size_t endRow, size_t endCol)                 const;
-	Mat<T>		  extract_rows     (size_t startRow, size_t endRow)			      const { return extract(startRow, 0, endRow, colSize); }
-	Mat<T>		  extract_columns  (size_t startCol, size_t endCol)			      const { return extract(0, startCol, rowSize, endCol); }
-	Mat<string>	  extract_rowNames (size_t startRow, size_t endRow)               const;
-	Mat<string>	  extract_colNames (size_t startCol, size_t endCol)               const;
+	void		  swap_rows	       (const size_t a, const size_t b);
+	void		  swap_columns     (const size_t a, const size_t b);
+	Mat<T>        extract          (const size_t startRow, const size_t startCol, 
+								    const size_t endRow,   const size_t endCol)   const;
+	Mat<T>		  extract_rows     (const size_t startRow, const size_t endRow)	  const { return extract(startRow, 0, endRow, colSize); }
+	Mat<T>		  extract_columns  (const size_t startCol, const size_t endCol)	  const { return extract(0, startCol, rowSize, endCol); }
+	Mat<string>	  extract_rowNames (const size_t startRow, const size_t endRow)   const;
+	Mat<string>	  extract_colNames (const size_t startCol, const size_t endCol)   const;
 	Mat<string>	  extract_rowNames ()										      const { return extract_rowNames(0, rowSize); }
 	Mat<string>	  extract_colNames ()                                             const { return extract_colNames(0, colSize); }
 	void		  transpose		   ();
@@ -93,12 +109,16 @@ public:
 	void          concat_horizontal(const Mat<T>& other);
 	void          concat_vertical  (const Mat<T>& other);
 	// friend functions:
-	friend Dict<Mat<T>>	LU<>			  (const Mat<T>& mat);
-	friend T			det<>			  (const Mat<T>& mat);
-	friend T			det_LU<>		  (const Mat<T>& mat);
-	friend T			det_inversion<>	  (const Mat<T>& mat);
-	friend Mat<T>		inv<>			  (const Mat<T>& mat);
-	friend Mat<T>		inv_Gauss_Jordan<>(const Mat<T>& mat);
+    friend Mat<T>       operator+          (const T& lhs, const Mat<T>& mat);
+    friend Mat<T>       operator-          (const T& lhs, const Mat<T>& mat);
+    friend Mat<T>       operator*          (const T& lhs, const Mat<T>& mat);
+    friend Mat<T>       operator/          (const T& lhs, const Mat<T>& mat);
+	friend Dict<Mat<T>>	LU<T>			   (const Mat<T>& mat);
+	friend T			det<T>			   (const Mat<T>& mat);
+	friend T			det_LU<T>		   (const Mat<T>& mat);
+	friend T			det_inversion<T>   (const Mat<T>& mat);
+	friend Mat<T>		inv<T>			   (const Mat<T>& mat);
+	friend Mat<T>		inv_Gauss_Jordan<T>(const Mat<T>& mat);
 private:
 	T*			   operator[]		 (const size_t i)		                         { return data[i]; }
 	const T* const operator[]		 (const size_t i)						   const { return data[i]; }
@@ -222,6 +242,66 @@ void Mat<T>::operator=(const Mat<T>& other) {
 // 	if (this == &other) return;
 // }
 template<typename T>
+void Mat<T>::operator+= (const T& rhs)
+{
+    for(size_t i = 0; i < rowSize; ++i)
+        for(size_t j = 0; j < colSize; ++j)
+            data[i][j]+=rhs;
+    refresh();
+}
+template<typename T>
+void Mat<T>::operator-= (const T& rhs)
+{
+    for(size_t i = 0; i < rowSize; ++i)
+        for(size_t j = 0; j < colSize; ++j)
+            data[i][j]-=rhs;
+    refresh();
+}
+template<typename T>
+void Mat<T>::operator*= (const T& rhs)
+{
+    for(size_t i = 0; i < rowSize; ++i)
+        for(size_t j = 0; j < colSize; ++j)
+            data[i][j]*=rhs;
+    refresh();
+}
+template<typename T>
+void Mat<T>::operator/= (const T& rhs)
+{
+    for(size_t i = 0; i < rowSize; ++i)
+        for(size_t j = 0; j < colSize; ++j)
+            data[i][j]/=rhs;
+    refresh();
+}
+template<typename T>
+Mat<T> Mat<T>::operator+ (const T& rhs) const
+{
+    Mat<T> lhs(*this);
+    lhs += rhs;
+    return lhs;
+}
+template<typename T>
+Mat<T> Mat<T>::operator- (const T& rhs) const
+{
+    Mat<T> lhs(*this);
+    lhs -= rhs;
+    return lhs;
+}
+template<typename T>
+Mat<T> Mat<T>::operator* (const T& rhs) const 
+{
+    Mat<T> lhs(*this);
+    lhs *= rhs;
+    return lhs;
+}
+template<typename T>                              
+Mat<T> Mat<T>::operator/ (const T& rhs) const 
+{
+    Mat<T> lhs(*this);
+    lhs /= rhs;
+    return lhs;
+}
+template<typename T>
 T& Mat<T>::loc(const string& rowName, const string& colName)
 {
 	size_t i = 0, j = 0;
@@ -269,7 +349,7 @@ void Mat<T>::clear_colNames()
 	refresh();
 }
 template<typename T>
-void Mat<T>::swap_rows(size_t a, size_t b)
+void Mat<T>::swap_rows(const size_t a,const size_t b)
 {
 	if (a >= rowSize || b >= rowSize) 
 		throw invalid_argument("Error: Row index out of bounds.");
@@ -279,7 +359,7 @@ void Mat<T>::swap_rows(size_t a, size_t b)
 	refresh();
 }
 template<typename T>
-void Mat<T>::swap_columns(size_t a, size_t b)
+void Mat<T>::swap_columns(const size_t a,const size_t b)
 {
 	if (a >= colSize || b >= colSize)
 		throw invalid_argument("Error: Row index out of bounds.");
@@ -290,7 +370,7 @@ void Mat<T>::swap_columns(size_t a, size_t b)
 	refresh();
 }
 template<typename T>
-Mat<T> Mat<T>::extract(size_t startRow, size_t startCol, size_t endRow, size_t endCol) const
+Mat<T> Mat<T>::extract(const size_t startRow, const size_t startCol, const size_t endRow, const size_t endCol) const
 {
 	if(startRow>=endRow || startCol>=endCol)
 		throw invalid_argument("Error: Start index must be less than end index.");
@@ -307,7 +387,7 @@ Mat<T> Mat<T>::extract(size_t startRow, size_t startCol, size_t endRow, size_t e
 	return mat;
 }
 template<typename T>
-Mat<string>	Mat<T>::extract_rowNames(size_t startRow, size_t endRow) const
+Mat<string>	Mat<T>::extract_rowNames(const size_t startRow, const size_t endRow) const
 {
 	if (startRow >= endRow)
 		throw invalid_argument("Error: Start index must be less than end index.");
@@ -319,7 +399,7 @@ Mat<string>	Mat<T>::extract_rowNames(size_t startRow, size_t endRow) const
 	return mat;
 }
 template<typename T>
-Mat<string>	Mat<T>::extract_colNames(size_t startCol, size_t endCol) const
+Mat<string>	Mat<T>::extract_colNames(const size_t startCol, const size_t endCol) const
 {
 	if (startCol >= endCol)
 		throw invalid_argument("Error: Start index must be less than end index.");
@@ -504,7 +584,7 @@ size_t P::CountSwaps(const Mat<T>& P)
 		return swapsCount;
 	}
 template<typename T>
-Mat<T>& transpose(const Mat<T>& mat)
+Mat<T> transpose(const Mat<T>& mat)
 {
 	Mat<T> ret(mat.size_column(), mat.size_row());
 	for (size_t i = 0; i < ret.size_row(); ++i)
@@ -517,10 +597,24 @@ Mat<T>& transpose(const Mat<T>& mat)
 	return ret;
 }
 template<typename T>
-Mat<T>& dot(const Mat<T>& lhs, const Mat<T>& rhs)
+Mat<T> dot(const Mat<T>& lhs, const Mat<T>& rhs)
 {
 	Mat<T> ret(lhs);
 	return ret.dot(rhs);
+}
+template<typename T> 
+Mat<T> concat_horizontal(const Mat<T>& left, const Mat<T>& right)
+{
+    Mat<T> ret(left);
+    ret.concat_horizontal(right);
+    return ret;
+}
+template<typename T> 
+Mat<T>& concat_vertical(const Mat<T>& top, const Mat<T>& bottom)
+{
+    Mat<T> ret(top);
+    ret.concat_vertical(bottom);
+    return ret;
 }
 template<typename T>
 void display(const Mat<T> mat, WITH_WHICH_NAME withWhichName)
@@ -601,6 +695,26 @@ void display_rainbow(const Mat<T> mat, WITH_WHICH_NAME withWhichName)
 	}
 }
 #pragma region friend functions
+template<typename T> 
+Mat<T> operator+ (const T& lhs, const Mat<T>& mat)
+{
+    return mat + lhs;
+}
+template<typename T>
+Mat<T> operator- (const T& lhs, const Mat<T>& mat)
+{
+    return mat - lhs;
+}
+template<typename T>
+Mat<T> operator* (const T& lhs, const Mat<T>& mat)
+{
+    return mat * lhs;
+}
+template<typename T>
+Mat<T> operator/ (const T& lhs, const Mat<T>& mat)
+{
+    return mat / lhs;
+}
 template<typename T>
 Dict<Mat<T>> LU(const Mat<T>& mat) 
 {
