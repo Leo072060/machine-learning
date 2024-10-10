@@ -117,9 +117,9 @@ public:
 // * * * * * * * attributes * * * * * * *
 public:
 	// model parameters
-	double learning_rate = 0.0005;
-	size_t batch_size = 100;
-	size_t iterations = 7000;
+	double learning_rate = 0.0003;
+	size_t batch_size = 1000;
+	size_t iterations = 10000;
 private:
 	// calculated value
 	ManagedVal<Mat<T>> THETAS;
@@ -145,6 +145,7 @@ void LinearRegression<T>::train(const Mat<T>& x, const Mat<T>& y)
     // start training
     for(size_t i = 0; i < iterations; ++i)
     {
+    cout<<"Output of the training iteration : "<<i+1<<endl;
     // generate random numbers
     if(x.size_row() < batch_size)
          throw out_of_range("Error: Batch size is larger than the available rows.");
@@ -157,7 +158,7 @@ void LinearRegression<T>::train(const Mat<T>& x, const Mat<T>& y)
     
     Mat<T> tmp_thetas(thetas);
 
-    for(size_t i = 0; i < x.size_column(); ++i)
+    for(size_t i = 0; i < w.size_column(); ++i)
     {
         T tmp_theta_i = 0;
         for(auto& e:randomNums)
@@ -167,6 +168,7 @@ void LinearRegression<T>::train(const Mat<T>& x, const Mat<T>& y)
         tmp_thetas.iloc(0,i) += (tmp_theta_i/batch_size);
     }
     thetas = tmp_thetas;
+    display_rainbow(thetas);
     }
     this->record(THETAS,thetas);
 }
