@@ -1,6 +1,6 @@
 CMakeFiles/ML.dir/src/managed.cpp.o: \
  /home/twh/machineLearning/src/managed.cpp /usr/include/stdc-predef.h \
- /home/twh/machineLearning/include/managed.h \
+ /home/twh/machineLearning/include/kits/managed.h \
  /usr/include/c++/11/stdexcept /usr/include/c++/11/exception \
  /usr/include/x86_64-linux-gnu/c++/11/bits/c++config.h \
  /usr/include/x86_64-linux-gnu/c++/11/bits/os_defines.h \

@@ -9,8 +9,8 @@
 #include<math.h>
 #include<set>
 
-#include"dict.h"
-#include"managed.h"
+#include"kits/dict.h"
+#include"kits/managed.h"
 
 using namespace std;
 
@@ -31,47 +31,53 @@ using WITH_WHICH_NAME = uint8_t;
 #pragma endregion
 
 #pragma region forward declaration
+
 template<class T> class Mat;
+
 #pragma region non-member functions
-namespace P
-{
-	template<typename T> size_t CountSwaps(const Mat<T>& P);
-}
-template<typename T> Mat<T>       transpose        (const Mat<T>& mat);
-template<typename T> Mat<T>       dot              (const Mat<T>& lhs, const Mat<T>& rhs);
-template<typename T> Mat<T>       concat_horizontal(const Mat<T>& left, const Mat<T>& right);
-template<typename T> Mat<T>       concat_vertical  (const Mat<T>& top, const Mat<T>& bottom);
-template<typename T> void         display          (const Mat<T> mat, WITH_WHICH_NAME withWhichName = WITHOUT_NAME);
-template<typename T> void         display_rainbow  (const Mat<T> mat, WITH_WHICH_NAME withWhichName = WITHOUT_NAME);
-#pragma region friend functions
+
 template<typename T> Mat<T>       operator+        (const T& lhs, const Mat<T>& mat);
 template<typename T> Mat<T>       operator-        (const T& lhs, const Mat<T>& mat);
 template<typename T> Mat<T>       operator*        (const T& lhs, const Mat<T>& mat);
 template<typename T> Mat<T>       operator/        (const T& lhs, const Mat<T>& mat);
+
+template<typename T> Mat<T>       transpose        (const Mat<T>& mat);
+template<typename T> Mat<T>       dot              (const Mat<T>& lhs, const Mat<T>& rhs);
 template<typename T> Dict<Mat<T>> LU               (const Mat<T>& mat);
 template<typename T> T            det              (const Mat<T>& mat);
 template<typename T> T            det_LU           (const Mat<T>& mat);
 template<typename T> T            det_inversion    (const Mat<T>& mat);
 template<typename T> Mat<T>       inv              (const Mat<T>& mat);
 template<typename T> Mat<T>       inv_Gauss_Jordan (const Mat<T>& mat);
-#pragma endregion
-#pragma endregion
+
+template<typename T> Mat<T>       concat_horizontal(const Mat<T>& left, const Mat<T>& right);
+template<typename T> Mat<T>       concat_vertical  (const Mat<T>& top, const Mat<T>& bottom);
+
+template<typename T> void         display          (const Mat<T> mat, WITH_WHICH_NAME withWhichName = WITHOUT_NAME);
+template<typename T> void         display_rainbow  (const Mat<T> mat, WITH_WHICH_NAME withWhichName = WITHOUT_NAME);
+
+// for matrix P
+namespace P
+{
+	template<typename T> size_t CountSwaps(const Mat<T>& P);
+}
+
 #pragma endregion
 
-template<class T=double>
+#pragma endregion
+
+template<class T = double>
 class Mat
 {
 public:
 	Mat ();
 	Mat (const Mat<T>& other);
-	// Mat (Mat&& other) noexcept;
 	Mat (const size_t rowSize, const size_t colSize);
 	Mat (const size_t rowSize, const size_t colSize, MATRIX_TYPE matrixType);
 	~Mat();
 
 // * * * * * * * functions * * * * * * * 
 	void		  operator=	       (const Mat<T>& other);
-	// void		  operator=        (Mat<T>&& other) noexcept;
     void          operator+=       (const T& rhs);
     void          operator-=       (const T& rhs);
     void          operator*=       (const T& rhs);
@@ -87,7 +93,8 @@ public:
     Mat<T>        operator+        (const Mat<T>& rhs)                            const;
     Mat<T>        operator-        (const Mat<T>& rhs)                            const;
     Mat<T>        operator*        (const Mat<T>& rhs)                            const;                                 
-    Mat<T>        operator/        (const Mat<T>& rhs)                            const;                         
+    Mat<T>        operator/        (const Mat<T>& rhs)                            const;   
+                    
 	T& 			  iloc		       (const size_t i, const size_t j)					    { refresh(); return data[i][j]; }
 	const T&	  iloc		       (const size_t i, const size_t j)               const { return data[i][j]; }
     Mat<T>        iloc_row         (const size_t i)                               const { return extract_rows(i,i+1); }
@@ -98,13 +105,17 @@ public:
 	const string& iloc_rowName     (const size_t& i)                              const { return rowNames[i]; }
 	string&		  iloc_colName     (const size_t& i)								    { return colNames[i]; }
 	const string& iloc_colName     (const size_t& i)                              const { return colNames[i]; }
-	void          clear_names      ()                                                   { clear_rowNames(); clear_colNames(); }
+	
+    void          clear_names      ()                                                   { clear_rowNames(); clear_colNames(); }
 	void          clear_rowNames   ();
 	void          clear_colNames   ();
+
 	size_t		  size_row	       ()                                             const { return rowSize; }
 	size_t		  size_column	   ()                                             const { return colSize; }
+
 	void		  swap_rows	       (const size_t a, const size_t b);
 	void		  swap_columns     (const size_t a, const size_t b);
+
 	Mat<T>        extract          (const size_t startRow, const size_t startCol, 
 								    const size_t endRow,   const size_t endCol)   const;
 	Mat<T>		  extract_rows     (const size_t startRow, const size_t endRow)	  const { return extract(startRow, 0, endRow, colSize); }
@@ -113,27 +124,20 @@ public:
 	Mat<string>	  extract_colNames (const size_t startCol, const size_t endCol)   const;
 	Mat<string>	  extract_rowNames ()										      const { return extract_rowNames(0, rowSize); }
 	Mat<string>	  extract_colNames ()                                             const { return extract_colNames(0, colSize); }
+
     void          drop_rows        (const size_t startRow, const size_t endRow);
     void          drop_columns     (const size_t startCol, const size_t endCol);
     void          drop_rows        (const set<size_t>& rows);
     void          drop_columns     (const set<size_t>& cols);
     void          drop_row         (const size_t i);
     void          drop_column      (const size_t i);
+
 	void		  transpose		   ();
 	void		  dot              (const Mat<T>& other);
+
 	void          concat_horizontal(const Mat<T>& other);
 	void          concat_vertical  (const Mat<T>& other);
-	// friend functions:
-    friend Mat<T>       operator+          (const T& lhs, const Mat<T>& mat);
-    friend Mat<T>       operator-          (const T& lhs, const Mat<T>& mat);
-    friend Mat<T>       operator*          (const T& lhs, const Mat<T>& mat);
-    friend Mat<T>       operator/          (const T& lhs, const Mat<T>& mat);
-	friend Dict<Mat<T>>	LU<T>			   (const Mat<T>& mat);
-	friend T			det<T>			   (const Mat<T>& mat);
-	friend T			det_LU<T>		   (const Mat<T>& mat);
-	friend T			det_inversion<T>   (const Mat<T>& mat);
-	friend Mat<T>		inv<T>			   (const Mat<T>& mat);
-	friend Mat<T>		inv_Gauss_Jordan<T>(const Mat<T>& mat);
+
 private:
 	T*			   operator[]		 (const size_t i)		                         { return data[i]; }
 	const T* const operator[]		 (const size_t i)						   const { return data[i]; }
@@ -142,6 +146,14 @@ private:
 	void		   refresh			 ()                                        const;
 	void		   copy_calculatedVal(const Mat<T>& other)                     const;
 
+	// friend functions:
+	friend Dict<Mat<T>>	LU<T>			   (const Mat<T>& mat);
+	friend T			det<T>			   (const Mat<T>& mat);
+	friend T			det_LU<T>		   (const Mat<T>& mat);
+	friend T			det_inversion<T>   (const Mat<T>& mat);
+	friend Mat<T>		inv<T>			   (const Mat<T>& mat);
+	friend Mat<T>		inv_Gauss_Jordan<T>(const Mat<T>& mat);
+    
 // * * * * * * * attributes * * * * * * *
 private:
 	T**					data		= nullptr;
@@ -159,6 +171,7 @@ private:
 };
 
 #pragma region function definition
+
 #pragma region lifecycle management
 template<typename T>
 Mat<T>::Mat():DET(administrator), L(administrator),U(administrator),P(administrator) {}
@@ -182,19 +195,6 @@ Mat<T>::Mat(const Mat<T>& other) :Mat()
 		colNames[i] = other.colNames[i];
 	copy_calculatedVal(other);
 }
-// template<typename T>
-// Mat<T>::Mat(Mat&& other):administrator(move(other.administrator)),
-//                          DET(move(other.DET)),
-//                          L(move(other.L)),
-//                          U(move(other.U)),
-//                          P(move(other.P))
-// {
-// 	data     = other.data;     other.data     = nullptr;
-// 	rowNames = other.rowNames; other.rowNames = nullptr;
-// 	colNames = other.colNames; other.colNames = nullptr;
-// 	rowSize  = other.rowSize;
-// 	colSize  = other.colSize;
-// }
 template<typename T>
 Mat<T>::Mat(const size_t rowSize,const size_t colSize) :Mat() 
 {
@@ -235,6 +235,7 @@ Mat<T>::~Mat()
 	if (colNames) delete[] colNames;
 }
 #pragma endregion
+
 #pragma region member functions
 template<typename T>
 void Mat<T>::operator=(const Mat<T>& other) {
@@ -251,11 +252,6 @@ void Mat<T>::operator=(const Mat<T>& other) {
 	}
 	copy_calculatedVal(other);
 }
-// template<typename T>
-// void Mat<T>::operator=(Mat<T>&& other)
-// {
-// 	if (this == &other) return;
-// }
 template<typename T>
 void Mat<T>::operator+=(const T& rhs)
 {
@@ -672,7 +668,6 @@ void Mat<T>::concat_vertical(const Mat<T>& other)
     rowNames = new_rowNames;
 	rowSize  = new_rowSize; 
 }
-
 template<typename T> template<typename Y>
 void Mat<T>::record(ManagedVal<Y>& managedVal, const Y& val) const
 {
@@ -697,54 +692,17 @@ void Mat<T>::copy_calculatedVal(const Mat<T>& other) const
 	Copy(administrator, P	, other.P);
 }
 #pragma endregion
-#pragma region non-member functions
-template<typename T>
-size_t P::CountSwaps(const Mat<T>& P)
-	{
-		size_t swapsCount = 0;
-		// verify if it is a P matrix 
-		// and record the column positions where each row has a value of 1
-		vector<size_t> record(P.size_row());
-		for (size_t i = 0; i < P.size_row(); ++i)
-		{
-			bool find_1 = false;
-			for (size_t j = 0; j < P.size_column(); ++j)
-			{
-				if (1 == P.iloc(i,j))
-				{
-					if (find_1 == false)
-					{
-						record[i] = j;
-						find_1    = true;
-					}
-					else  
-						throw invalid_argument("Error: Row " + to_string(i) + " has multiple leading 1s in the permutation matrix.");
-				}
-			}
-			if (find_1 == false)  
-				throw invalid_argument("Error: Row " + to_string(i) + " does not have a leading 1 in the permutation matrix.");
-		}
 
-		for (size_t i = 0; i < P.size_row(); ++i)
-		{
-			if (record[i] != i)
-			{
-				size_t j = i + 1;
-				for (; j < P.size_row(); ++j)
-				{
-					if (record[j] == i)
-					{
-						record[j] = record[i];
-						++swapsCount;
-						break;
-					}
-				}
-				if (j == P.size_row())
-					throw invalid_argument("Error: Row " + to_string(i) + " does not have a leading 1 in the permutation matrix.");
-			}
-		}
-		return swapsCount;
-	}
+#pragma region non-member functions
+
+template<typename T> 
+Mat<T> operator+(const T& lhs, const Mat<T>& mat) { return mat + lhs; }
+template<typename T>
+Mat<T> operator-(const T& lhs, const Mat<T>& mat) { return mat - lhs; }
+template<typename T>
+Mat<T> operator*(const T& lhs, const Mat<T>& mat) { return mat * lhs; }
+template<typename T>
+Mat<T> operator/(const T& lhs, const Mat<T>& mat) { return mat / lhs; }
 template<typename T>
 Mat<T> transpose(const Mat<T>& mat)
 {
@@ -764,119 +722,6 @@ Mat<T> dot(const Mat<T>& lhs, const Mat<T>& rhs)
 	Mat<T> ret(lhs);
 	ret.dot(rhs);
     return ret;
-}
-template<typename T> 
-Mat<T> concat_horizontal(const Mat<T>& left, const Mat<T>& right)
-{
-    Mat<T> ret(left);
-    ret.concat_horizontal(right);
-    return ret;
-}
-template<typename T> 
-Mat<T>& concat_vertical(const Mat<T>& top, const Mat<T>& bottom)
-{
-    Mat<T> ret(top);
-    ret.concat_vertical(bottom);
-    return ret;
-}
-template<typename T>
-void display(const Mat<T> mat, WITH_WHICH_NAME withWhichName)
-{
-	const int width_val     = 15;
-	const int width_rowName = 10;
-	const int precision     = 5;
-	cout << "Shape: " << mat.size_row() << " * " << mat.size_column() << endl;
-	if (CHECK_FLAG(withWhichName, WITH_COLNAME))
-	{
-		if (CHECK_FLAG(withWhichName, WITH_ROWNAME))
-			cout << fixed << setw(width_rowName) << " ";
-		for (size_t i = 0; i < mat.size_column(); ++i)
-			cout << fixed << setw(width_val) << mat.iloc_colName(i);
-		cout << endl;
-	}
-	for (size_t i = 0; i < mat.size_row(); ++i)
-	{
-		if (CHECK_FLAG(withWhichName, WITH_ROWNAME))
-			cout << fixed << setw(width_rowName) << mat.iloc_rowName(i);
-		for (size_t j = 0; j < mat.size_column(); ++j)
-		{
-			const T val = mat.iloc(i,j);
-			if constexpr (is_same<T, string>::value)
-				cout << setw(width_val) << val;
-			else if constexpr (is_floating_point<T>::value)
-			{
-				if (val == static_cast<int>(val))
-					cout << fixed << setw(width_val) << static_cast<int>(val);
-				else
-					cout << fixed << setprecision(precision) << setw(width_val) << val;
-			}
-			else cout << setw(width_val) << val;
-		}
-		cout << endl;
-	}
-}
-// use ANSI escape codes for font color
-template<typename T>
-void display_rainbow(const Mat<T> mat, WITH_WHICH_NAME withWhichName)
-{
-	const int width_val     = 15;
-	const int width_rowName = 10;
-	const int precision     = 5;
-	cout << "Shape: " << mat.size_row() << " * " << mat.size_column() << endl;
-	if (CHECK_FLAG(withWhichName, WITH_COLNAME))
-	{
-		if (CHECK_FLAG(withWhichName, WITH_ROWNAME))
-			cout << fixed << setw(width_rowName) << " ";
-		for (size_t i = 0; i < mat.size_column(); ++i)
-		{
-			cout << "\033[" << (i % 2 == 0 ? "32m" : "34m"); // alternate text color
-			cout << fixed << setw(width_val) << mat.iloc_colName(i);
-		}
-		cout << "\033[0m" << endl; // reset colors
-	}
-	for (size_t i = 0; i < mat.size_row(); ++i) {
-		cout << "\033[" << (i % 2 == 0 ? "48;5;235" : "48;5;240") << "m"; // alternate background color
-
-		if (CHECK_FLAG(withWhichName, WITH_ROWNAME))
-			cout << fixed << setw(width_rowName) << mat.iloc_rowName(i);
-		for (size_t j = 0; j < mat.size_column(); ++j)
-		{
-			cout << "\033[" << (j % 2 == 0 ? "32m" : "34m"); // alternate text color
-			const T  val = mat.iloc(i, j);
-			if constexpr (is_same<T, string>::value)
-				cout << setw(width_val) << val;
-			else if constexpr (is_floating_point<T>::value)
-			{
-				if (val == static_cast<int>(val))
-					cout << fixed << setw(width_val) << static_cast<int>(val);
-				else
-					cout << fixed << setprecision(precision) << setw(width_val) << val;
-			}
-			else cout << setw(width_val) << val;
-		}
-		cout << "\033[0m" << endl; // reset colors
-	}
-}
-#pragma region friend functions
-template<typename T> 
-Mat<T> operator+(const T& lhs, const Mat<T>& mat)
-{
-    return mat + lhs;
-}
-template<typename T>
-Mat<T> operator-(const T& lhs, const Mat<T>& mat)
-{
-    return mat - lhs;
-}
-template<typename T>
-Mat<T> operator*(const T& lhs, const Mat<T>& mat)
-{
-    return mat * lhs;
-}
-template<typename T>
-Mat<T> operator/(const T& lhs, const Mat<T>& mat)
-{
-    return mat / lhs;
 }
 template<typename T>
 Dict<Mat<T>> LU(const Mat<T>& mat) 
@@ -1000,7 +845,8 @@ Mat<T> inv(const Mat<T>& mat)
 	return inv_Gauss_Jordan(mat);
 }
 template<typename T>
-Mat<T> inv_Gauss_Jordan(const Mat<T>& mat) {
+Mat<T> inv_Gauss_Jordan(const Mat<T>& mat) 
+{
 	if (mat.size_row() != mat.size_column())
 		throw invalid_argument("Error: Matrix must be square to compute inverse.");
 	Mat<T> A(mat);
@@ -1047,13 +893,149 @@ Mat<T> inv_Gauss_Jordan(const Mat<T>& mat) {
 	}
 	return I;
 }
+template<typename T> 
+Mat<T> concat_horizontal(const Mat<T>& left, const Mat<T>& right)
+{
+    Mat<T> ret(left);
+    ret.concat_horizontal(right);
+    return ret;
+}
+template<typename T> 
+Mat<T>& concat_vertical(const Mat<T>& top, const Mat<T>& bottom)
+{
+    Mat<T> ret(top);
+    ret.concat_vertical(bottom);
+    return ret;
+}
+
+template<typename T>
+void display(const Mat<T> mat, WITH_WHICH_NAME withWhichName)
+{
+	const int width_val     = 15;
+	const int width_rowName = 10;
+	const int precision     = 5;
+	cout << "Shape: " << mat.size_row() << " * " << mat.size_column() << endl;
+	if (CHECK_FLAG(withWhichName, WITH_COLNAME))
+	{
+		if (CHECK_FLAG(withWhichName, WITH_ROWNAME))
+			cout << fixed << setw(width_rowName) << " ";
+		for (size_t i = 0; i < mat.size_column(); ++i)
+			cout << fixed << setw(width_val) << mat.iloc_colName(i);
+		cout << endl;
+	}
+	for (size_t i = 0; i < mat.size_row(); ++i)
+	{
+		if (CHECK_FLAG(withWhichName, WITH_ROWNAME))
+			cout << fixed << setw(width_rowName) << mat.iloc_rowName(i);
+		for (size_t j = 0; j < mat.size_column(); ++j)
+		{
+			const T val = mat.iloc(i,j);
+			if constexpr (is_same<T, string>::value)
+				cout << setw(width_val) << val;
+			else if constexpr (is_floating_point<T>::value)
+			{
+				if (val == static_cast<int>(val))
+					cout << fixed << setw(width_val) << static_cast<int>(val);
+				else
+					cout << fixed << setprecision(precision) << setw(width_val) << val;
+			}
+			else cout << setw(width_val) << val;
+		}
+		cout << endl;
+	}
+}
+// use ANSI escape codes for font color
+template<typename T>
+void display_rainbow(const Mat<T> mat, WITH_WHICH_NAME withWhichName)
+{
+	const int width_val     = 15;
+	const int width_rowName = 10;
+	const int precision     = 5;
+	cout << "Shape: " << mat.size_row() << " * " << mat.size_column() << endl;
+	if (CHECK_FLAG(withWhichName, WITH_COLNAME))
+	{
+		if (CHECK_FLAG(withWhichName, WITH_ROWNAME))
+			cout << fixed << setw(width_rowName) << " ";
+		for (size_t i = 0; i < mat.size_column(); ++i)
+		{
+			cout << "\033[" << (i % 2 == 0 ? "32m" : "34m"); // alternate text color
+			cout << fixed << setw(width_val) << mat.iloc_colName(i);
+		}
+		cout << "\033[0m" << endl; // reset colors
+	}
+	for (size_t i = 0; i < mat.size_row(); ++i) {
+		cout << "\033[" << (i % 2 == 0 ? "48;5;235" : "48;5;240") << "m"; // alternate background color
+
+		if (CHECK_FLAG(withWhichName, WITH_ROWNAME))
+			cout << fixed << setw(width_rowName) << mat.iloc_rowName(i);
+		for (size_t j = 0; j < mat.size_column(); ++j)
+		{
+			cout << "\033[" << (j % 2 == 0 ? "32m" : "34m"); // alternate text color
+			const T  val = mat.iloc(i, j);
+			if constexpr (is_same<T, string>::value)
+				cout << setw(width_val) << val;
+			else if constexpr (is_floating_point<T>::value)
+			{
+				if (val == static_cast<int>(val))
+					cout << fixed << setw(width_val) << static_cast<int>(val);
+				else
+					cout << fixed << setprecision(precision) << setw(width_val) << val;
+			}
+			else cout << setw(width_val) << val;
+		}
+		cout << "\033[0m" << endl; // reset colors
+	}
+}
+template<typename T>
+size_t P::CountSwaps(const Mat<T>& P)
+	{
+		size_t swapsCount = 0;
+		// verify if it is a P matrix 
+		// and record the column positions where each row has a value of 1
+		vector<size_t> record(P.size_row());
+		for (size_t i = 0; i < P.size_row(); ++i)
+		{
+			bool find_1 = false;
+			for (size_t j = 0; j < P.size_column(); ++j)
+			{
+				if (1 == P.iloc(i,j))
+				{
+					if (find_1 == false)
+					{
+						record[i] = j;
+						find_1    = true;
+					}
+					else  
+						throw invalid_argument("Error: Row " + to_string(i) + " has multiple leading 1s in the permutation matrix.");
+				}
+			}
+			if (find_1 == false)  
+				throw invalid_argument("Error: Row " + to_string(i) + " does not have a leading 1 in the permutation matrix.");
+		}
+
+		for (size_t i = 0; i < P.size_row(); ++i)
+		{
+			if (record[i] != i)
+			{
+				size_t j = i + 1;
+				for (; j < P.size_row(); ++j)
+				{
+					if (record[j] == i)
+					{
+						record[j] = record[i];
+						++swapsCount;
+						break;
+					}
+				}
+				if (j == P.size_row())
+					throw invalid_argument("Error: Row " + to_string(i) + " does not have a leading 1 in the permutation matrix.");
+			}
+		}
+		return swapsCount;
+	}
+
 #pragma endregion
+
 #pragma endregion
-#pragma endregion
-
-
-
-
-
 
 #endif // MAT_H

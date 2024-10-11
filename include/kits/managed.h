@@ -7,6 +7,7 @@
 using namespace std;
 
 #pragma region macro definition
+
 #define ADMINISTRATOR_ID  uint8_t
 #define PERMISSION		  uint8_t
 #define PERMISSION_LOWEST 0b11111111
@@ -18,6 +19,7 @@ using namespace std;
 2	PERMISSION_WRITE	read	write
 */
 #define CHECK_FLAG(NAME, FLAG) ((NAME | FLAG) == FLAG)
+
 #pragma endregion
 
 
@@ -52,8 +54,6 @@ protected:
 		:administrator_ID(admin.ID), permission(perm) {}
     ManagedBase(const Administrator& admin,const ManagedBase& other)
         :administrator_ID(other.administrator_ID),permission(other.permission){}
-	// ManagedBase(ManagedBase&& other) noexcept
-	// 	:administrator_ID(other.administrator_ID),permission(other.permission){}
 public:
 	virtual ~ManagedBase() = default;
 
@@ -85,13 +85,16 @@ protected:
 
 
 #pragma region forward declaration
+
 template<class T> class ManagedVal;
+
 #pragma region non-member functions
-#pragma region friend functions
+
 template<typename T> void ForceWrite(const Administrator& admin, ManagedVal<T>& managedVal, const T& value);
 template<typename T> void Copy      (const Administrator& admin, ManagedVal<T>& managedVal, const ManagedVal<T>& other);
+
 #pragma endregion
-#pragma endregion
+
 #pragma endregion
 
 template<class T>
@@ -118,6 +121,7 @@ private:
 };
 
 #pragma region function definition
+
 #pragma region member functions
 template<typename T>
 const T& ManagedVal<T>::read() const
@@ -134,8 +138,9 @@ void ManagedVal<T>::write(const T& val)
 	value = make_unique<T>(val);
 }
 #pragma endregion
+
 #pragma region non-member functions
-#pragma region friend functions
+
 template<typename T>
 void Copy(const Administrator& admin, ManagedVal<T>& managedVal, const ManagedVal<T>& other)
 {
@@ -145,8 +150,9 @@ void Copy(const Administrator& admin, ManagedVal<T>& managedVal, const ManagedVa
 	else managedVal.value = make_unique<T>(*other.value);
 	managedVal.permission = other.permission;
 }
+
 #pragma endregion
-#pragma endregion
+
 #pragma endregion
 
 

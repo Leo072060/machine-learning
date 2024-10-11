@@ -7,10 +7,10 @@
 #include<set>
 
 
-#include"modelBase.h"
-#include"managed.h"
-#include"numatrix.h"
-#include"dict.h"
+#include"ML/modelBase.h"
+#include"kits/managed.h"
+#include"mat/mat.h"
+#include"kits/dict.h"
 
 
 
@@ -40,7 +40,9 @@ private:
 };
 
 #pragma region function definition
+
 #pragma region member functions
+
 template<typename T>
 void SimpleLinearRegression<T>::train(const Mat<T>& x, const Mat<T>& y)
 {
@@ -95,7 +97,9 @@ Dict<T> SimpleLinearRegression<T>::get_trainedParameters() const
 	ret.insert("b", B.read());
 	return ret;
 }
+
 #pragma endregion 
+
 #pragma endregion 
 
 
@@ -126,7 +130,9 @@ private:
 };
 
 #pragma region function definition
+
 #pragma region member functions
+
 template<typename T>
 void LinearRegression<T>::train(const Mat<T>& x, const Mat<T>& y)
 {
@@ -192,7 +198,9 @@ Dict<T> LinearRegression<T>::get_trainedParameters() const
     }
 	return ret;
 }
+
 #pragma endregion 
+
 #pragma endregion 
 
 

@@ -4,9 +4,9 @@
 #include <exception>
 #include <bitset>
 
-#include"dataLoader.h"
-#include"numatrix.h"
-#include"linearModel.h"
+#include"kits/loader.h"
+#include"mat/mat.h"
+#include"ML/linearModel.h"
 
 using namespace std;
 
@@ -14,7 +14,7 @@ int main()
 {
   
     string csvFileName = "../test/regression_dataset.csv";
-    csv_dataLoader<double> loader;
+    csv_Loader<double> loader;
     loader.with_which_name = WITH_COLNAME;
     Mat<double> M = loader.load_matrix(csvFileName);
     // display_rainbow(M);

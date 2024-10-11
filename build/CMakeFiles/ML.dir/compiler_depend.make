@@ -223,12 +223,12 @@ CMakeFiles/ML.dir/src/main.cpp.o: ../src/main.cpp \
   /usr/include/c++/11/bits/fs_dir.h \
   /usr/include/c++/11/bits/fs_ops.h \
   /usr/include/c++/11/bitset \
-  ../include/dataLoader.h \
+  ../include/kits/loader.h \
   /usr/include/c++/11/fstream \
   /usr/include/x86_64-linux-gnu/c++/11/bits/basic_file.h \
   /usr/include/x86_64-linux-gnu/c++/11/bits/c++io.h \
   /usr/include/c++/11/bits/fstream.tcc \
-  ../include/mat.h \
+  ../include/mat/mat.h \
   /usr/include/c++/11/functional \
   /usr/include/c++/11/bits/std_function.h \
   /usr/include/c++/11/unordered_map \
@@ -272,11 +272,11 @@ CMakeFiles/ML.dir/src/main.cpp.o: ../src/main.cpp \
   /usr/include/c++/11/bits/stl_tree.h \
   /usr/include/c++/11/bits/stl_set.h \
   /usr/include/c++/11/bits/stl_multiset.h \
-  ../include/dict.h \
+  ../include/kits/dict.h \
   /usr/include/c++/11/map \
   /usr/include/c++/11/bits/stl_map.h \
   /usr/include/c++/11/bits/stl_multimap.h \
-  ../include/managed.h \
+  ../include/kits/managed.h \
   /usr/include/c++/11/memory \
   /usr/include/c++/11/bits/stl_raw_storage_iter.h \
   /usr/include/c++/11/bits/align.h \
@@ -287,8 +287,7 @@ CMakeFiles/ML.dir/src/main.cpp.o: ../src/main.cpp \
   /usr/include/c++/11/backward/auto_ptr.h \
   /usr/include/c++/11/pstl/glue_memory_defs.h \
   /usr/include/c++/11/pstl/execution_defs.h \
-  ../include/numatrix.h \
-  ../include/linearModel.h \
+  ../include/ML/linearModel.h \
   /usr/include/c++/11/random \
   /usr/include/c++/11/bits/random.h \
   /usr/include/x86_64-linux-gnu/c++/11/bits/opt_random.h \
@@ -296,8 +295,7 @@ CMakeFiles/ML.dir/src/main.cpp.o: ../src/main.cpp \
   /usr/include/c++/11/numeric \
   /usr/include/c++/11/bits/stl_numeric.h \
   /usr/include/c++/11/pstl/glue_numeric_defs.h \
-  ../include/modelBase.h \
-  ../include/numatrix.h
+  ../include/ML/modelBase.h
 
 CMakeFiles/ML.dir/src/managed.cpp.o: ../src/managed.cpp \
   /usr/include/stdc-predef.h \
@@ -484,7 +482,7 @@ CMakeFiles/ML.dir/src/managed.cpp.o: ../src/managed.cpp \
   /usr/include/c++/11/pstl/execution_defs.h
 
 
-../include/modelBase.h:
+../include/managed.h:
 
 /usr/include/c++/11/bits/stl_numeric.h:
 
@@ -493,10 +491,6 @@ CMakeFiles/ML.dir/src/managed.cpp.o: ../src/managed.cpp \
 /usr/include/c++/11/bits/random.h:
 
 /usr/include/c++/11/random:
-
-../include/linearModel.h:
-
-../include/numatrix.h:
 
 /usr/include/c++/11/pstl/glue_memory_defs.h:
 
@@ -516,15 +510,15 @@ CMakeFiles/ML.dir/src/managed.cpp.o: ../src/managed.cpp \
 
 /usr/include/c++/11/memory:
 
+../include/kits/managed.h:
+
 /usr/include/c++/11/bits/stl_multimap.h:
 
 /usr/include/c++/11/bits/stl_map.h:
 
 /usr/include/c++/11/map:
 
-../include/managed.h:
-
-../include/dict.h:
+../include/kits/dict.h:
 
 /usr/include/c++/11/bits/stl_multiset.h:
 
@@ -602,6 +596,10 @@ CMakeFiles/ML.dir/src/managed.cpp.o: ../src/managed.cpp \
 
 /usr/include/c++/11/ext/concurrence.h:
 
+../include/ML/modelBase.h:
+
+../include/mat/mat.h:
+
 /usr/include/c++/11/bits/ios_base.h:
 
 /usr/include/x86_64-linux-gnu/bits/fp-logb.h:
@@ -678,6 +676,8 @@ CMakeFiles/ML.dir/src/managed.cpp.o: ../src/managed.cpp \
 
 /usr/include/c++/11/exception:
 
+/usr/include/c++/11/bits/invoke.h:
+
 /usr/include/c++/11/cstdint:
 
 /usr/include/x86_64-linux-gnu/bits/waitstatus.h:
@@ -726,10 +726,6 @@ CMakeFiles/ML.dir/src/managed.cpp.o: ../src/managed.cpp \
 
 /usr/include/c++/11/pstl/pstl_config.h:
 
-/usr/include/c++/11/cmath:
-
-/usr/include/c++/11/bits/allocator.h:
-
 /usr/include/c++/11/bits/char_traits.h:
 
 /usr/include/asm-generic/errno-base.h:
@@ -741,6 +737,8 @@ CMakeFiles/ML.dir/src/managed.cpp.o: ../src/managed.cpp \
 /usr/include/stdc-predef.h:
 
 /usr/include/c++/11/bits/alloc_traits.h:
+
+../include/ML/linearModel.h:
 
 /usr/include/x86_64-linux-gnu/bits/types/__locale_t.h:
 
@@ -1016,17 +1014,17 @@ CMakeFiles/ML.dir/src/managed.cpp.o: ../src/managed.cpp \
 
 /usr/include/c++/11/bits/fs_ops.h:
 
-../include/dataLoader.h:
+/usr/include/c++/11/cmath:
+
+/usr/include/c++/11/bits/allocator.h:
+
+../include/kits/loader.h:
+
+/usr/include/c++/11/bits/fstream.tcc:
 
 /usr/include/x86_64-linux-gnu/c++/11/bits/basic_file.h:
 
 /usr/include/x86_64-linux-gnu/c++/11/bits/c++io.h:
-
-/usr/include/c++/11/bits/fstream.tcc:
-
-/usr/include/c++/11/bits/invoke.h:
-
-../include/mat.h:
 
 /usr/include/c++/11/bits/hashtable.h:
 

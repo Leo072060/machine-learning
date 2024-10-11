@@ -173,13 +173,13 @@ CMakeFiles/ML.dir/src/main.cpp.o: /home/twh/machineLearning/src/main.cpp \
  /usr/include/c++/11/ext/aligned_buffer.h \
  /usr/include/c++/11/bits/fs_dir.h /usr/include/c++/11/bits/fs_ops.h \
  /usr/include/c++/11/bitset \
- /home/twh/machineLearning/include/dataLoader.h \
+ /home/twh/machineLearning/include/kits/loader.h \
  /usr/include/c++/11/fstream \
  /usr/include/x86_64-linux-gnu/c++/11/bits/basic_file.h \
  /usr/include/x86_64-linux-gnu/c++/11/bits/c++io.h \
  /usr/include/c++/11/bits/fstream.tcc \
- /home/twh/machineLearning/include/mat.h /usr/include/c++/11/functional \
- /usr/include/c++/11/bits/std_function.h \
+ /home/twh/machineLearning/include/mat/mat.h \
+ /usr/include/c++/11/functional /usr/include/c++/11/bits/std_function.h \
  /usr/include/c++/11/unordered_map /usr/include/c++/11/bits/hashtable.h \
  /usr/include/c++/11/bits/hashtable_policy.h \
  /usr/include/c++/11/bits/enable_special_members.h \
@@ -214,10 +214,11 @@ CMakeFiles/ML.dir/src/main.cpp.o: /home/twh/machineLearning/src/main.cpp \
  /usr/include/c++/11/tr1/riemann_zeta.tcc /usr/include/c++/11/set \
  /usr/include/c++/11/bits/stl_tree.h /usr/include/c++/11/bits/stl_set.h \
  /usr/include/c++/11/bits/stl_multiset.h \
- /home/twh/machineLearning/include/dict.h /usr/include/c++/11/map \
+ /home/twh/machineLearning/include/kits/dict.h /usr/include/c++/11/map \
  /usr/include/c++/11/bits/stl_map.h \
  /usr/include/c++/11/bits/stl_multimap.h \
- /home/twh/machineLearning/include/managed.h /usr/include/c++/11/memory \
+ /home/twh/machineLearning/include/kits/managed.h \
+ /usr/include/c++/11/memory \
  /usr/include/c++/11/bits/stl_raw_storage_iter.h \
  /usr/include/c++/11/bits/align.h /usr/include/c++/11/bit \
  /usr/include/c++/11/bits/shared_ptr_atomic.h \
@@ -226,12 +227,10 @@ CMakeFiles/ML.dir/src/main.cpp.o: /home/twh/machineLearning/src/main.cpp \
  /usr/include/c++/11/backward/auto_ptr.h \
  /usr/include/c++/11/pstl/glue_memory_defs.h \
  /usr/include/c++/11/pstl/execution_defs.h \
- /home/twh/machineLearning/include/numatrix.h \
- /home/twh/machineLearning/include/linearModel.h \
+ /home/twh/machineLearning/include/ML/linearModel.h \
  /usr/include/c++/11/random /usr/include/c++/11/bits/random.h \
  /usr/include/x86_64-linux-gnu/c++/11/bits/opt_random.h \
  /usr/include/c++/11/bits/random.tcc /usr/include/c++/11/numeric \
  /usr/include/c++/11/bits/stl_numeric.h \
  /usr/include/c++/11/pstl/glue_numeric_defs.h \
- /home/twh/machineLearning/include/modelBase.h \
- /home/twh/machineLearning/include/numatrix.h
+ /home/twh/machineLearning/include/ML/modelBase.h

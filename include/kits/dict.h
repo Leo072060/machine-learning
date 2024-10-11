@@ -26,13 +26,17 @@ private:
 };
 
 #pragma region function definition
+
 #pragma region member functions
+
 template<typename T>
 void Dict<T>::insert(string key, T value)
 {
 	data.insert({ key, value });
 }
+
 #pragma endregion
+
 #pragma endregion
 
 

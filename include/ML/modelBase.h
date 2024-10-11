@@ -1,8 +1,8 @@
 #ifndef MODELBASE_H
 #define MODELBASE_H
 
-#include"managed.h"
-#include"mat.h"
+#include"kits/managed.h"
+#include"mat/mat.h"
 
 using namespace std;
 

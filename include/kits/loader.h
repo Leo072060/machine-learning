@@ -5,7 +5,7 @@
 #include<sstream>
 #include<vector>
 
-#include"mat.h"
+#include"mat/mat.h"
 
 using namespace std;
 
@@ -16,16 +16,18 @@ using namespace std;
 
 
 #pragma region forward declaration
+
 #pragma region non-member functions
 template<typename T> T str2T(const string& str);
 #pragma endregion
+
 #pragma endregion
 
 template<class T>
-class dataLoader
+class Loader
 {
 protected:
-    dataLoader() {}
+    Loader() {}
 
     // * * * * * * * functions * * * * * * *
 public:
@@ -36,10 +38,10 @@ public:
 };
 
 template<class T>
-class csv_dataLoader:public dataLoader<T>
+class csv_Loader:public Loader<T>
 {
 public:
-    csv_dataLoader() {}
+    csv_Loader() {}
 
 // * * * * * * * functions * * * * * * *
 public:
@@ -53,7 +55,7 @@ public:
 #pragma region function definition
 #pragma region member functions
 template<typename T>
-Mat<T> csv_dataLoader<T>::load_matrix(const string& fileName) const
+Mat<T> csv_Loader<T>::load_matrix(const string& fileName) const
 {
     ifstream file(fileName);
     if (!file.is_open())
@@ -133,7 +135,9 @@ Mat<T> csv_dataLoader<T>::load_matrix(const string& fileName) const
     return mat;
 }
 #pragma endregion
+
 #pragma region non-member functions
+
 template<typename T>
 T str2T(const string& str)
 {
@@ -144,12 +148,9 @@ T str2T(const string& str)
         throw std::invalid_argument("Error: Invalid value: " + str);
     return val;
 }
+
 #pragma endregion
+
 #pragma endregion
-
-
-
-
-
 
 #endif //DATA_LOADER_H
