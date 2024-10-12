@@ -192,7 +192,10 @@ private:
 
 #pragma region lifecycle management
 template<typename T>
-Mat<T>::Mat():DET(administrator), L(administrator),U(administrator),P(administrator),MEAN(administrator),MEAN_ROW(administrator),MEAN_COLUMN(administrator) {}
+Mat<T>::Mat():DET(administrator), 
+              L(administrator),U(administrator),P(administrator),
+              MEAN(administrator),MEAN_ROW(administrator),MEAN_COLUMN(administrator),
+              SUM(administrator),SUM_ROW(administrator),SUM_COLUMN(administrator) {}
 template<typename T>
 Mat<T>::Mat(const Mat<T>& other) :Mat() 
 {
