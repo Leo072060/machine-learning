@@ -5,6 +5,7 @@
 #include<vector>
 #include<random>
 #include<set>
+#include<cmath>
 
 
 #include"ML/modelBase.h"
@@ -122,8 +123,8 @@ public:
 public:
 	// model parameters
 	double learning_rate = 0.0003;
-	size_t batch_size = 1000;
-	size_t iterations = 10000;
+	size_t batch_size = 100;
+	size_t iterations = 3000;
 private:
 	// calculated value
 	ManagedVal<Mat<T>> THETAS;
@@ -137,7 +138,7 @@ template<typename T>
 void LinearRegression<T>::train(const Mat<T>& x, const Mat<T>& y)
 {
 	if (y.size_column() != 1)
-		throw invalid_argument("Error: Matrix y must be single-column matrices.");
+		throw invalid_argument("Error: Matrix y must be single-column matrix.");
 	if (x.size_row() != y.size_row())
 		throw invalid_argument("Error: Matrix x and y must have the same number of rows.");
 	if (x.size_row() < 1)
@@ -205,6 +206,110 @@ Dict<T> LinearRegression<T>::get_trainedParameters() const
 
 
 
+
+
+
+
+template<typename T>
+class Log_LinearRegression:public LinearRegression<T>
+{
+public:
+    Log_LinearRegression():RegressionModelBase<T>(),THETAS(this->administrator){};
+// * * * * * * * functions * * * * * * *
+public:
+	void    train(const Mat<T>& x, const Mat<T>& y) override;
+	Mat<T>  predict(const Mat<T>& x) const			override;
+    Dict<T> get_trainedParameters()  const          override;
+// * * * * * * * attributes * * * * * * *
+public:
+	// model parameters
+	double learning_rate = 0.0003;
+	size_t batch_size = 100;
+	size_t iterations = 3000;
+private:
+	// calculated value
+	ManagedVal<Mat<T>> THETAS;
+};
+
+#pragma region function definition
+
+#pragma region member functions
+
+template<typename T>
+void Log_LinearRegression<T>::train(const Mat<T>& x, const Mat<T>& y)
+{
+	if (y.size_column() != 1)
+		throw invalid_argument("Error: Matrix y must be single-column matrices.");
+	if (x.size_row() != y.size_row())
+		throw invalid_argument("Error: Matrix x and y must have the same number of rows.");
+	if (x.size_row() < 1)
+		throw invalid_argument("Error: Matrix x must have at least one row.");
+
+    Mat<T> ones(x.size_row(),1);
+    for(size_t i = 0; i < x.size_row(); ++i) ones.iloc(i,0) = 1;
+    Mat<T> w = concat_horizontal(x,ones);
+    Mat<T> thetas(1,x.size_column()+1);
+
+    Mat<T> log_y(y);
+    for(size_t i = 0; i < log_y.size_row(); ++i)
+    {
+        log_y.iloc(i,0) = log(y.iloc(i,0));
+    }
+
+    // start training
+    for(size_t i = 0; i < iterations; ++i)
+    {
+    cout<<"Output of the training iteration : "<<i+1<<endl;
+    // generate random numbers
+    if(x.size_row() < batch_size)
+         throw out_of_range("Error: Batch size is larger than the available rows.");
+    set<size_t> randomNums;
+    random_device rd;
+    mt19937 gen(rd()); 
+    uniform_int_distribution<> dis(0, x.size_row()-1);
+    while (randomNums.size() < batch_size) 
+        randomNums.insert(dis(gen)); 
+    
+    Mat<T> tmp_thetas(thetas);
+
+    for(size_t i = 0; i < w.size_column(); ++i)
+    {
+        T tmp_theta_i = 0;
+        for(auto& e:randomNums)
+        {
+            tmp_theta_i += learning_rate*((log_y.iloc_row(e) - dot(thetas,transpose(w.iloc_row(e)))) * w.iloc(e,i)).iloc(0,0);
+        }
+        tmp_thetas.iloc(0,i) += (tmp_theta_i/batch_size);
+    }
+    thetas = tmp_thetas;
+    display_rainbow(thetas);
+    }
+    this->record(THETAS,thetas);
+}
+template<typename T>
+Mat<T> Log_LinearRegression<T>::predict(const Mat<T>& x) const
+{
+	if (x.size_column() != 1)
+		throw invalid_argument("Error: Input matrix x must be a single-column matrix for prediction.");
+	Mat<T> y(1, x.size_row());
+
+	return y;
+}
+template<typename T>
+Dict<T> Log_LinearRegression<T>::get_trainedParameters() const 
+{
+    Dict<T> ret;
+    for(size_t i = 0; i < THETAS.read().size_column(); ++i)
+    {
+        string parameterName = "theta" + to_string(i);
+        ret.insert(parameterName,THETAS.read().iloc(0,i));
+    }
+	return ret;
+}
+
+#pragma endregion 
+
+#pragma endregion 
 
 
 #endif // LINEAR_MODEL_H

@@ -49,6 +49,14 @@ template<typename T> T            det_LU           (const Mat<T>& mat);
 template<typename T> T            det_inversion    (const Mat<T>& mat);
 template<typename T> Mat<T>       inv              (const Mat<T>& mat);
 template<typename T> Mat<T>       inv_Gauss_Jordan (const Mat<T>& mat);
+template<typename T> T            mean             (const Mat<T>& mat);
+template<typename T> Mat<T>       mean_row         (const Mat<T>& mat);
+template<typename T> Mat<T>       mean_column      (const Mat<T>& mat);
+template<typename T> Mat<T>       sum              (const Mat<T>& mat);
+template<typename T> Mat<T>       sum_row          (const Mat<T>& mat);
+template<typename T> Mat<T>       sum_column       (const Mat<T>& mat);
+template<typename T> Mat<T>       power            (const Mat<T>& mat,int exponent);
+template<typename T> Mat<T>       abs              (const Mat<T>& mat);
 
 template<typename T> Mat<T>       concat_horizontal(const Mat<T>& left, const Mat<T>& right);
 template<typename T> Mat<T>       concat_vertical  (const Mat<T>& top, const Mat<T>& bottom);
@@ -134,6 +142,7 @@ public:
 
 	void		  transpose		   ();
 	void		  dot              (const Mat<T>& other);
+    void          fill             (const T& val);
 
 	void          concat_horizontal(const Mat<T>& other);
 	void          concat_vertical  (const Mat<T>& other);
@@ -153,7 +162,10 @@ private:
 	friend T			det_inversion<T>   (const Mat<T>& mat);
 	friend Mat<T>		inv<T>			   (const Mat<T>& mat);
 	friend Mat<T>		inv_Gauss_Jordan<T>(const Mat<T>& mat);
-    
+    friend T            mean               (const Mat<T>& mat);
+    friend Mat<T>       mean_row           (const Mat<T>& mat);
+    friend Mat<T>       mean_column        (const Mat<T>& mat);
+
 // * * * * * * * attributes * * * * * * *
 private:
 	T**					data		= nullptr;
@@ -168,13 +180,19 @@ private:
 	mutable ManagedVal<Mat<T>>	L;
 	mutable ManagedVal<Mat<T>>	U;
 	mutable ManagedVal<Mat<T>>	P;
+    mutable ManagedVal<T>  MEAN;
+    mutable ManagedVal<Mat<T>>  MEAN_ROW;
+    mutable ManagedVal<Mat<T>>  MEAN_COLUMN;
+    mutable ManagedVal<Mat<T>>  SUM;
+    mutable ManagedVal<T>  SUM_ROW;
+    mutable ManagedVal<Mat<T>>  SUM_COLUMN;
 };
 
 #pragma region function definition
 
 #pragma region lifecycle management
 template<typename T>
-Mat<T>::Mat():DET(administrator), L(administrator),U(administrator),P(administrator) {}
+Mat<T>::Mat():DET(administrator), L(administrator),U(administrator),P(administrator),MEAN(administrator),MEAN_ROW(administrator),MEAN_COLUMN(administrator) {}
 template<typename T>
 Mat<T>::Mat(const Mat<T>& other) :Mat() 
 {
@@ -615,6 +633,13 @@ void Mat<T>::dot(const Mat<T>& other)
 	refresh();
 }
 template<typename T>
+void Mat<T>::fill(const T& val)
+{
+    for(size_t i = 0; i < rowSize; ++i)
+            for(size_t j = 0; j < colSize; ++j)
+                data[i][j] = val;
+}
+template<typename T>
 void Mat<T>::concat_horizontal(const Mat<T>& other)
 {
     if (rowSize != other.rowSize)
@@ -892,6 +917,94 @@ Mat<T> inv_Gauss_Jordan(const Mat<T>& mat)
 		}
 	}
 	return I;
+}
+template<typename T> 
+T mean (const Mat<T>& mat)
+{
+    if(mat.MEAN.readable()) return mat.MEAN.read();
+    record(mat.administrator,mat.MEAN,(mean_row(mat)).iloc(0,0));
+    return mat.MEAN.read();
+}
+template<typename T> 
+Mat<T> mean_row(const Mat<T>& mat)
+{
+    if(mat.MEAN_ROW.readable()) return mat.MEAN_ROW.read();
+    Mat<T> ret(mat.size_row(),1);
+    for(size_t i = 0; i < mat.size_row(); ++i)
+    {
+        T mean = 0;
+        for(size_t j = 0; j < mat.size_column(); ++j)
+        {
+            mean += (mat.iloc(i,j)-mean)/(j+1); 
+        }
+        ret.iloc(i,0) = mean;
+    }
+    record(mat.administrator,mat.MEAN_ROW,ret);
+    return mat.MEAN_ROW.read();
+}
+template<typename T> 
+Mat<T> mean_column(const Mat<T>& mat)
+{
+    if(mat.MEAN_COLUMN.readable()) return mat.MEAN_COLUMN.read();
+    Mat<T> ret(1,mat.size_column());
+    for(size_t i = 0; i < mat.size_column(); ++i)
+    {
+        T mean = 0;
+        for(size_t j = 0; j < mat.size_row(); ++j)
+        {
+            mean += (mat.iloc(j,i)-mean)/(j+1);
+        }
+        ret.iloc(0,i) = mean;
+    }
+    record(mat.administrator,mat.MEAN_COLUMN,ret);
+    return mat.MEAN_COLUMN.read();
+}
+template<typename T> 
+Mat<T> sum(const Mat<T>& mat)
+{
+    if(mat.SUM.readable()) return mat.SUM.read();
+    record(sum_column(sum_row(mat)));
+    return mat.SUM.read();
+}
+template<typename T> 
+Mat<T> sum_row(const Mat<T>& mat)
+{
+    if(mat.SUM_ROW.readable()) return mat.SUM_ROW.read();
+    Mat<T> ret(mat.size_row(),1);
+    for(size_t i = 0; i < mat.size_row(); ++i)
+        for(size_t j = 0; j < mat.size_column(); ++j)
+            ret.iloc(i,0) += mat.iloc(i,j);
+    record(mat.SUM_ROW,ret);
+    return mat.SUM_ROW.read();
+}
+template<typename T> 
+Mat<T> sum_column(const Mat<T>& mat)
+{
+    if(mat.SUM_COLUMN.readable()) return mat.SUM_COLUMN.read();
+    Mat<T> ret(1,mat.size_column());
+    for(size_t i = 0; i < mat.size_column(); ++i)
+        for(size_t j = 0; j < mat.size_row(); ++j)
+            ret.iloc(0,i) += mat.iloc(j,i);
+    record(mat.SUM_COLUMN,ret);
+    return mat.SUM_COLUMN.read();
+}
+template<typename T> 
+Mat<T> power(const Mat<T>& mat,int exponent)
+{
+    Mat<T> ret(mat.size_row(),mat.size_column());
+    for(size_t i = 0; i < mat.size_row(); ++i)
+        for(size_t j = 0; j < mat.size_column(); ++j)
+            ret.iloc(i,j) = power(mat.iloc(i,j),exponent);
+    return ret;
+}
+template<typename T> 
+Mat<T> abs(const Mat<T>& mat)
+{
+    Mat<T> ret(mat.size_row(),mat.size_column());
+    for(size_t i = 0; i < mat.size_row(); ++i)
+        for(size_t j = 0; j < mat.size_column(); ++j)
+            ret.iloc(i,j) = abs(mat.iloc(i,j));
+    return ret;
 }
 template<typename T> 
 Mat<T> concat_horizontal(const Mat<T>& left, const Mat<T>& right)

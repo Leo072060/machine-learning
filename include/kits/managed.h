@@ -3,6 +3,7 @@
 
 #include<stdexcept>
 #include<memory>
+#include<vector>
 
 using namespace std;
 
@@ -28,18 +29,62 @@ using namespace std;
 
 
 
+#pragma region forward declaration
+
+class Administrator;
+class ManagedItem;
+
+#pragma endregion
+
 class Administrator
 {
 public:
 	Administrator() :ID(GlobalID++) {}
-    
+
+// * * * * * * * functions * * * * * * *
+    void registerManagedItem(const ManagedItem& managedItem,const PERMISSION& perm = PERMISSION_LOWEST) const;
+    void setManagedItemPermission(const ManagedItem& managedItem, const PERMISSION& perm) const;
+    void setManagedItemsPermission(const PERMISSION& perm) const;
+    void addManagedItemPermission(const ManagedItem& managedItem,const PERMISSION& perm) const;
+
 // * * * * * * * attributes * * * * * * *
 public:
 	const  ADMINISTRATOR_ID	ID;
 private:
 	static ADMINISTRATOR_ID	GlobalID;
+    mutable vector<const ManagedItem*> managedItemList;
 };
 
+#pragma region function defination
+
+#pragma region member functions
+void Administrator::registerManagedItem(const ManagedItem& managedItem,const PERMISSION& perm) const
+{
+    SetPermission(*this,managedItem,perm);
+    managedItemList.push_back(&managedItem);
+}
+void Administrator::setManagedItemPermission(const ManagedItem& managedItem, const PERMISSION& perm) const
+{
+    if (ID != managedItem.administrator_ID)
+		throw runtime_error("Error: This administrator does not have permission to modify.");
+	managedItem.permission = perm;
+}
+void Administrator::setManagedItemsPermission(const PERMISSION& perm) const
+{
+    for(const auto& e : managedItemList)
+        SetPermission(*this,*e,perm);
+}
+void Administrator::addManagedItemPermission(const ManagedItem& managedItem,const PERMISSION& perm) const
+{
+    if (ID != managedItem.administrator_ID)
+		throw runtime_error("Error: This administrator does not have permission to modify.");
+    if (managedItem.check_permission(perm)) return;
+	managedItem.permission = managedBase.permission & perm;
+}
+
+#pragma endregion
+
+#pragma endregion
 
 
 
@@ -47,35 +92,35 @@ private:
 
 
 
-class ManagedBase
+class ManagedItem
 {
 protected:
-	ManagedBase(const Administrator& admin,const PERMISSION perm = PERMISSION_LOWEST)
-		:administrator_ID(admin.ID), permission(perm) {}
-    ManagedBase(const Administrator& admin,const ManagedBase& other)
+	ManagedItem(Administrator& admin,const PERMISSION& perm = PERMISSION_LOWEST)
+		:administrator_ID(admin.ID){admin.registerManagedItem(*this,perm);}
+    ManagedItem(const Administrator& admin,const ManagedItem& other)
         :administrator_ID(other.administrator_ID),permission(other.permission){}
 public:
-	virtual ~ManagedBase() = default;
+	virtual ~ManagedItem() = default;
 
 // * * * * * * * functions * * * * * * *
 public:
-	bool	   check_permission(const PERMISSION perm) const { return CHECK_FLAG(permission,perm); }
+	bool	   check_permission(const PERMISSION& perm) const { return CHECK_FLAG(permission,perm); }
 	PERMISSION get_permission  ()                      const { return permission; }
 	bool	   readable		   ()                      const { return check_permission(PERMISSION_READ); }
 	// friend functions:
 	friend void	SetPermission (const Administrator& admin,
-							   ManagedBase& managedBase,
-							   const PERMISSION perm);
+							   const ManagedItem& managedItem,
+							   const PERMISSION& perm);
 	friend void AddPermission (const Administrator& admin,
-							   ManagedBase& managedBase,
-							   const PERMISSION perm);
+							   ManagedItem& managedItem,
+							   const PERMISSION& perm);
 
 
 // * * * * * * * attributes * * * * * * *
 public:
 	const ADMINISTRATOR_ID administrator_ID;
 protected:
-	PERMISSION			   permission;
+	mutable PERMISSION     permission;
 };
 
 
@@ -98,15 +143,15 @@ template<typename T> void Copy      (const Administrator& admin, ManagedVal<T>& 
 #pragma endregion
 
 template<class T>
-class ManagedVal :public ManagedBase
+class ManagedVal :public ManagedItem
 {
 public:
-	ManagedVal(const Administrator& admin, const PERMISSION perm = PERMISSION_LOWEST)
-        :ManagedBase(admin, perm), value(nullptr) {};
+	ManagedVal(const Administrator& admin, const PERMISSION& perm = PERMISSION_LOWEST)
+        :ManagedItem(admin, perm), value(nullptr) {};
     ManagedVal(const Administrator& admin, const ManagedVal& other)
-        :ManagedBase(other),value(*other.value){};
+        :ManagedItem(other),value(*other.value){};
 	// ManagedVal(ManagedVal&& other) noexcept
-    //     :ManagedBase(move(other)),value(move(other.value)){}
+    //     :ManagedItem(move(other)),value(move(other.value)){}
 // * * * * * * * functions * * * * * * *
 public:
 	operator T	     () const {return static_cast<T>(*value); }
@@ -161,4 +206,42 @@ void Copy(const Administrator& admin, ManagedVal<T>& managedVal, const ManagedVa
 
 
 
+template<typename T>
+class ManagedClass
+{
+protected:
+    ManagedClass();
+
+protected:
+template<typename Y> void Record(ManagedVal<Y>& managedVal, const Y& val) const;
+void Refresh() const;
+private:
+    Administrator administrator;
+    mutable bool isRefreshed = true;
+};
+
+#pragma region function declaration
+
+#pragma region member functions
+
+template<typename T>
+template<typename Y>
+void ManagedClass<T>::Record(ManagedVal<Y>& managedVal, const Y& val) const
+{
+	SetPermission(administrator, managedVal, PERMISSION_WRITE);
+    managedVal.write(val);
+    SetPermission(administrator, managedVal, PERMISSION_READ);
+	isRefreshed = false;
+}
+template<typename T>
+void ManagedClass<T>::Refresh() const
+{
+    if(isRefreshed) return;
+    administrator.setManagedItemsPermission(PERMISSION_LOWEST);
+    isRefreshed = true;
+}
+
+#pragma endregion
+
+#pragma endregion
 #endif // MANAGED_H

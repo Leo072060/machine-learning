@@ -25,7 +25,7 @@ public:
     virtual Dict<T> get_trainedParameters()  const            = 0;
 protected:
 	template<typename Y>
-	void           record (ManagedVal<Y>& managedVal, const Y& val) const;
+	void           record(ManagedVal<Y>& managedVal, const Y& val) const;
 
 // * * * * * * * attributes * * * * * * *
 public:

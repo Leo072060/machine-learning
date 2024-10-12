@@ -16,7 +16,7 @@ feature5 = np.random.rand(num_samples) * 20   # 特征5
 noise = np.random.randn(num_samples) * 10      # 随机噪声
 
 # 生成目标变量（假设目标是所有特征的线性组合加上噪声）
-target = 7 * feature1 + 3 * feature2 + 5 * feature3 + 2 * feature4 + 4 * feature5  + 5
+target = 7 * feature1 + 3 * feature2 + 5 * feature3 + 2 * feature4 + 4 * feature5 
 
 # 创建DataFrame
 data = pd.DataFrame({
