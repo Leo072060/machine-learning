@@ -31,11 +31,9 @@ using WITH_WHICH_NAME = uint8_t;
 #pragma endregion
 
 #pragma region forward declaration
-
 template<class T> class Mat;
 
 #pragma region non-member functions
-
 template<typename T> Mat<T>       operator+        (const T& lhs, const Mat<T>& mat);
 template<typename T> Mat<T>       operator-        (const T& lhs, const Mat<T>& mat);
 template<typename T> Mat<T>       operator*        (const T& lhs, const Mat<T>& mat);
@@ -52,7 +50,7 @@ template<typename T> Mat<T>       inv_Gauss_Jordan (const Mat<T>& mat);
 template<typename T> T            mean             (const Mat<T>& mat);
 template<typename T> Mat<T>       mean_row         (const Mat<T>& mat);
 template<typename T> Mat<T>       mean_column      (const Mat<T>& mat);
-template<typename T> Mat<T>       sum              (const Mat<T>& mat);
+template<typename T> T            sum              (const Mat<T>& mat);
 template<typename T> Mat<T>       sum_row          (const Mat<T>& mat);
 template<typename T> Mat<T>       sum_column       (const Mat<T>& mat);
 template<typename T> Mat<T>       power            (const Mat<T>& mat,int exponent);
@@ -61,15 +59,14 @@ template<typename T> Mat<T>       abs              (const Mat<T>& mat);
 template<typename T> Mat<T>       concat_horizontal(const Mat<T>& left, const Mat<T>& right);
 template<typename T> Mat<T>       concat_vertical  (const Mat<T>& top, const Mat<T>& bottom);
 
-template<typename T> void         display          (const Mat<T> mat, WITH_WHICH_NAME withWhichName = WITHOUT_NAME);
-template<typename T> void         display_rainbow  (const Mat<T> mat, WITH_WHICH_NAME withWhichName = WITHOUT_NAME);
+template<typename T> void         display          (const Mat<T>& mat, WITH_WHICH_NAME withWhichName = WITHOUT_NAME);
+template<typename T> void         display_rainbow  (const Mat<T>& mat, WITH_WHICH_NAME withWhichName = WITHOUT_NAME);
 
 // for matrix P
 namespace P
 {
 	template<typename T> size_t CountSwaps(const Mat<T>& P);
 }
-
 #pragma endregion
 
 #pragma endregion
@@ -135,10 +132,8 @@ public:
 
     void          drop_rows        (const size_t startRow, const size_t endRow);
     void          drop_columns     (const size_t startCol, const size_t endCol);
-    void          drop_rows        (const set<size_t>& rows);
-    void          drop_columns     (const set<size_t>& cols);
-    void          drop_row         (const size_t i);
-    void          drop_column      (const size_t i);
+    void          drop_row         (const size_t i)                                     { drop_rows(i,i+1); };
+    void          drop_column      (const size_t i)                                     { drop_column(i,i+1); }
 
 	void		  transpose		   ();
 	void		  dot              (const Mat<T>& other);
@@ -146,10 +141,9 @@ public:
 
 	void          concat_horizontal(const Mat<T>& other);
 	void          concat_vertical  (const Mat<T>& other);
-
 private:
-	T*			   operator[]		 (const size_t i)		                         { return data[i]; }
-	const T* const operator[]		 (const size_t i)						   const { return data[i]; }
+	T*			  operator[]	   (const size_t i)		                                { return data[i]; }
+	const T*const operator[]	   (const size_t i)						          const { return data[i]; }
 	// friend functions:
 	friend Dict<Mat<T>>	LU<T>			   (const Mat<T>& mat);
 	friend T			det<T>			   (const Mat<T>& mat);
@@ -157,10 +151,13 @@ private:
 	friend T			det_inversion<T>   (const Mat<T>& mat);
 	friend Mat<T>		inv<T>			   (const Mat<T>& mat);
 	friend Mat<T>		inv_Gauss_Jordan<T>(const Mat<T>& mat);
-    friend T            mean               (const Mat<T>& mat);
-    friend Mat<T>       mean_row           (const Mat<T>& mat);
-    friend Mat<T>       mean_column        (const Mat<T>& mat);
-
+    friend T            mean<T>            (const Mat<T>& mat);
+    friend Mat<T>       mean_row<T>        (const Mat<T>& mat);
+    friend Mat<T>       mean_column<T>     (const Mat<T>& mat);
+    friend T            sum<T>             (const Mat<T>& mat);
+    friend Mat<T>       sum_row<T>         (const Mat<T>& mat);
+    friend Mat<T>       sum_column<T>      (const Mat<T>& mat);
+    
 // * * * * * * * attributes * * * * * * *
 private:
 	T**					data		= nullptr;
@@ -173,8 +170,8 @@ private:
     mutable ManagedVal<T>       MEAN;
     mutable ManagedVal<Mat<T>>  MEAN_ROW;
     mutable ManagedVal<Mat<T>>  MEAN_COLUMN;
-    mutable ManagedVal<Mat<T>>  SUM;
-    mutable ManagedVal<T>       SUM_ROW;
+    mutable ManagedVal<T>       SUM;
+    mutable ManagedVal<Mat<T>>  SUM_ROW;
     mutable ManagedVal<Mat<T>>  SUM_COLUMN;
 };
 
@@ -558,26 +555,6 @@ void Mat<T>::drop_columns(const size_t startCol, const size_t endCol)
     this->refresh();
 }
 template<typename T>
-void Mat<T>::drop_rows(const set<size_t>& rows)
-{
-    // soon...
-}
-template<typename T>
-void Mat<T>::drop_columns(const set<size_t>& cols)
-{
-    // soon...
-}
-template<typename T>
-void Mat<T>::drop_row(const size_t i)
-{
-    // soon...
-}
-template<typename T>
-void Mat<T>::drop_column(const size_t i)
-{
-    // soon...
-}
-template<typename T>
 void Mat<T>::transpose()
 {
 	T** new_data = new T * [colSize];
@@ -790,7 +767,7 @@ T det_LU(const Mat<T>& mat)
 	if (P::CountSwaps(ret["P"]) % 2) 
 		return -det;
 	mat.record(mat.DET, det);
-	return det;
+	return mat.DET.read();
 }
 template<typename T>
 T det_inversion(const Mat<T>& mat) 
@@ -830,7 +807,7 @@ T det_inversion(const Mat<T>& mat)
 	det_recursive(0, 1, det, usedCol, 0);
 	delete[] usedCol;
 	mat.record(mat.administrator, mat.DET, det);
-	return det;
+	return mat.DET.read();
 }
 template<typename T>
 Mat<T> inv(const Mat<T>& mat)
@@ -890,7 +867,7 @@ template<typename T>
 T mean (const Mat<T>& mat)
 {
     if(mat.MEAN.readable()) return mat.MEAN.read();
-    mat.record(mat.administrator,mat.MEAN,(mean_row(mat)).iloc(0,0));
+    mat.record(mat.MEAN,mean_column(mean_row(mat)).iloc(0,0));
     return mat.MEAN.read();
 }
 template<typename T> 
@@ -907,7 +884,7 @@ Mat<T> mean_row(const Mat<T>& mat)
         }
         ret.iloc(i,0) = mean;
     }
-    mat.record(mat.administrator,mat.MEAN_ROW,ret);
+    mat.record(mat.MEAN_ROW,ret);
     return mat.MEAN_ROW.read();
 }
 template<typename T> 
@@ -924,14 +901,14 @@ Mat<T> mean_column(const Mat<T>& mat)
         }
         ret.iloc(0,i) = mean;
     }
-    mat.record(mat.administrator,mat.MEAN_COLUMN,ret);
+    mat.record(mat.MEAN_COLUMN,ret);
     return mat.MEAN_COLUMN.read();
 }
 template<typename T> 
-Mat<T> sum(const Mat<T>& mat)
+T sum(const Mat<T>& mat)
 {
     if(mat.SUM.readable()) return mat.SUM.read();
-    mat.record(sum_column(sum_row(mat)));
+    mat.record(mat.SUM,sum_column(sum_row(mat)).iloc(0,0));
     return mat.SUM.read();
 }
 template<typename T> 
@@ -962,7 +939,7 @@ Mat<T> power(const Mat<T>& mat,int exponent)
     Mat<T> ret(mat.size_row(),mat.size_column());
     for(size_t i = 0; i < mat.size_row(); ++i)
         for(size_t j = 0; j < mat.size_column(); ++j)
-            ret.iloc(i,j) = power(mat.iloc(i,j),exponent);
+            ret.iloc(i,j) = pow(mat.iloc(i,j),exponent);
     return ret;
 }
 template<typename T> 
@@ -990,7 +967,7 @@ Mat<T>& concat_vertical(const Mat<T>& top, const Mat<T>& bottom)
 }
 
 template<typename T>
-void display(const Mat<T> mat, WITH_WHICH_NAME withWhichName)
+void display(const Mat<T>& mat, WITH_WHICH_NAME withWhichName)
 {
 	const int width_val     = 15;
 	const int width_rowName = 10;
@@ -1027,7 +1004,7 @@ void display(const Mat<T> mat, WITH_WHICH_NAME withWhichName)
 }
 // use ANSI escape codes for font color
 template<typename T>
-void display_rainbow(const Mat<T> mat, WITH_WHICH_NAME withWhichName)
+void display_rainbow(const Mat<T>& mat, WITH_WHICH_NAME withWhichName)
 {
 	const int width_val     = 15;
 	const int width_rowName = 10;

@@ -22,7 +22,6 @@ protected:
 public:
 	virtual void    train  (const Mat<T>& x, const Mat<T>& y) = 0;
 	virtual Mat<T>  predict(const Mat<T>& x) const			  = 0;
-    virtual Dict<T> get_trainedParameters()  const            = 0;
 
 // * * * * * * * attributes * * * * * * *
 };
@@ -46,9 +45,5 @@ public:
 
 // * * * * * * * attributes * * * * * * *
 };
-
-
-
-
 
 #endif // MODELBASE_H

@@ -1,18 +1,19 @@
 #include<iostream>
 #include<stdexcept>
+#include<cmath>
 
 #include"mat/mat.h"
 #include"kits/managed.h"
 
 using namespace std;
 
-template<typename T>
-class RegressionEvaluation:public ManagedClass<T>
+template<typename T = double>
+class RegressionEvaluation:public ManagedClass
 {
 public:
     RegressionEvaluation():administrator(),
-                           COPY_target_y(administrator),
-                           target_y_minus_pred_y(administrator),
+                           TARGET_Y(administrator),PRED_Y(administrator),
+                           target_y_MINUS_pred_y(administrator),target_y_MINUS_mean_target_y(administrator),
                            MAE(administrator),
                            MSE(administrator),
                            RMSE(administrator),
@@ -39,7 +40,7 @@ private:
     mutable ManagedVal<T> RMSE;
     mutable ManagedVal<T> MAPE;
     mutable ManagedVal<T> R2;
-}
+};
 
 #pragma region function defination
 
@@ -51,7 +52,7 @@ void RegressionEvaluation<T>::fit(const Mat<T>& pred_y, const Mat<T>& target_y)
 		throw invalid_argument("Error: Matrix pred_y must be single-column matrix.");
     if (target_y.size_column() != 1)
 		throw invalid_argument("Error: Matrix target_y must be single-column matrix.");
-    
+    this->refresh();
     this->record(TARGET_Y,target_y);
     this->record(PRED_Y,pred_y);
     // calculate
@@ -64,11 +65,10 @@ void RegressionEvaluation<T>::fit(const Mat<T>& pred_y, const Mat<T>& target_y)
     for(size_t i = 0; i < target_y.size_row(); ++i)
         tmp.iloc(i,0) = target_y.iloc(i,0) - mean(TARGET_Y.read());
     this->record(target_y_MINUS_mean_target_y,tmp);
-
     isFitted = true;
 }   
 template<typename T>
-void report()
+void RegressionEvaluation<T>::report()
 {
     if(!isFitted) throw runtime_error("Error: The model must be fitted before generating the report.");
     cout<<"\tLinear Regression Model Performance Report\n";
@@ -99,15 +99,15 @@ T RegressionEvaluation<T>::root_mean_squared_error()
 {
     if(RMSE.readable()) return RMSE.read();
     if(!isFitted) throw runtime_error("Error: The model must be fitted before generating root mean squared error.");
-    this->record(RMSE,square(mean_squared_error()));
-    return root_mean_squared_error.read();
+    this->record(RMSE,pow(mean_squared_error(),0.5));
+    return RMSE.read();
 }
 template<typename T>
 T RegressionEvaluation<T>::mean_absolute_percentage_error()
 {
     if(MAPE.readable()) return MAPE.read();
     if(!isFitted) throw runtime_error("Error: The model must be fitted before generating mean absolute percentage error.");
-    this->record(mean(abs(target_y_MINUS_pred_y.read()/target_y)));
+    this->record(MAPE,mean(abs(target_y_MINUS_pred_y.read()/TARGET_Y)));
     return MAPE.read();
 }
 template<typename T>

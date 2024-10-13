@@ -30,10 +30,9 @@ public:
 	void    train                (const Mat<T>& x, const Mat<T>& y) override; 
 	Mat<T>  predict              (const Mat<T>& x) const            override;
 	T       predict              (const T& x)	   const;
-	Dict<T> get_trainedParameters()                const            override;
 
 // * * * * * * * attributes * * * * * * *
-private:
+public:
 	// calculated value
 	ManagedVal<T>      W;
 	ManagedVal<T>      B;
@@ -70,8 +69,8 @@ void SimpleLinearRegression<T>::train(const Mat<T>& x, const Mat<T>& y)
 	for (size_t i = 0; i < M; ++i)
 		b += (y[i] - w * x[i]) / M;
 
-	record(W, w);
-	record(B, b);
+	this->record(W, w);
+	this->record(B, b);
 }
 template<typename T>
 Mat<T> SimpleLinearRegression<T>::predict(const Mat<T>& x) const
@@ -90,15 +89,6 @@ T SimpleLinearRegression<T>::predict(const T& x) const
 		throw runtime_error("Error: Weights and biases must be readable before accessing trained parameters.");
 	return x * W.read() + B.read();
 }
-template<typename T>
-Dict<T> SimpleLinearRegression<T>::get_trainedParameters() const
-{
-	Dict<T> ret;
-	ret.insert("w", W.read());
-	ret.insert("b", B.read());
-	return ret;
-}
-
 #pragma endregion 
 
 #pragma endregion 
@@ -116,16 +106,15 @@ public:
     LinearRegression():RegressionModelBase<T>(),THETAS(this->administrator){};
 // * * * * * * * functions * * * * * * *
 public:
-	void    train(const Mat<T>& x, const Mat<T>& y) override;
+	void    train  (const Mat<T>& x, const Mat<T>& y) override;
 	Mat<T>  predict(const Mat<T>& x) const			override;
-    Dict<T> get_trainedParameters()  const          override;
 // * * * * * * * attributes * * * * * * *
 public:
 	// model parameters
 	double learning_rate = 0.0003;
 	size_t batch_size = 100;
 	size_t iterations = 3000;
-private:
+public:
 	// calculated value
 	ManagedVal<Mat<T>> THETAS;
 };
@@ -152,7 +141,9 @@ void LinearRegression<T>::train(const Mat<T>& x, const Mat<T>& y)
     // start training
     for(size_t i = 0; i < iterations; ++i)
     {
-    cout<<"Output of the training iteration : "<<i+1<<endl;
+    #ifdef DEBUG
+        cout<<"Training iteration : "<<i+1<<endl;
+    #endif
     // generate random numbers
     if(x.size_row() < batch_size)
          throw out_of_range("Error: Batch size is larger than the available rows.");
@@ -175,31 +166,22 @@ void LinearRegression<T>::train(const Mat<T>& x, const Mat<T>& y)
         tmp_thetas.iloc(0,i) += (tmp_theta_i/batch_size);
     }
     thetas = tmp_thetas;
-    display_rainbow(thetas);
+    #ifdef DEBUG
+        display_rainbow(thetas);
+    #endif
     }
     this->record(THETAS,thetas);
 }
 template<typename T>
 Mat<T> LinearRegression<T>::predict(const Mat<T>& x) const
 {
-	if (x.size_column() != 1)
-		throw invalid_argument("Error: Input matrix x must be a single-column matrix for prediction.");
-	Mat<T> y(1, x.size_row());
-
-	return y;
+    if (x.size_column() + 1 != THETAS.read().size_column()) 
+        throw invalid_argument("Error: The input matrix has incompatible dimensions with the model parameters.");
+    Mat<T> ones(x.size_row(),1);
+    ones.fill(1);
+    Mat<T> w = concat_horizontal(x,ones);
+	return dot(w,(transpose(THETAS.read())));
 }
-template<typename T>
-Dict<T> LinearRegression<T>::get_trainedParameters() const 
-{
-    Dict<T> ret;
-    for(size_t i = 0; i < THETAS.read().size_column(); ++i)
-    {
-        string parameterName = "theta" + to_string(i);
-        ret.insert(parameterName,THETAS.read().iloc(0,i));
-    }
-	return ret;
-}
-
 #pragma endregion 
 
 #pragma endregion 
@@ -246,7 +228,7 @@ void Log_LinearRegression<T>::train(const Mat<T>& x, const Mat<T>& y)
 		throw invalid_argument("Error: Matrix x must have at least one row.");
 
     Mat<T> ones(x.size_row(),1);
-    for(size_t i = 0; i < x.size_row(); ++i) ones.iloc(i,0) = 1;
+    ones.fill(1);
     Mat<T> w = concat_horizontal(x,ones);
     Mat<T> thetas(1,x.size_column()+1);
 
@@ -291,9 +273,10 @@ Mat<T> Log_LinearRegression<T>::predict(const Mat<T>& x) const
 {
 	if (x.size_column() != 1)
 		throw invalid_argument("Error: Input matrix x must be a single-column matrix for prediction.");
-	Mat<T> y(1, x.size_row());
-
-	return y;
+    Mat<T> ones(x.size_row(),1);
+    ones.fill(1);
+    Mat<T> w = concat_horizontal(x,ones);
+	return w.dot(transpose(x));
 }
 template<typename T>
 Dict<T> Log_LinearRegression<T>::get_trainedParameters() const 

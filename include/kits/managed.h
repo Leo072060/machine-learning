@@ -24,9 +24,7 @@ using namespace std;
 
 
 #pragma region forward declaration
-
 class ManagedItem;
-
 #pragma endregion
 
 class Administrator

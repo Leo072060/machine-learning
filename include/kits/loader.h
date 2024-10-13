@@ -37,7 +37,30 @@ public:
 public:
 };
 
-template<class T>
+#pragma region function definition
+
+#pragma region non-member functions
+template<typename T>
+T str2T(const string& str)
+{
+    istringstream iss(str);
+    T val;
+    iss >> val;
+    if (iss.fail())
+        throw std::invalid_argument("Error: Invalid value: " + str);
+    return val;
+}
+#pragma endregion
+
+#pragma endregion
+
+
+
+
+
+
+
+template<class T = double>
 class csv_Loader:public Loader<T>
 {
 public:
@@ -53,6 +76,7 @@ public:
 };
 
 #pragma region function definition
+
 #pragma region member functions
 template<typename T>
 Mat<T> csv_Loader<T>::load_matrix(const string& fileName) const
@@ -134,21 +158,6 @@ Mat<T> csv_Loader<T>::load_matrix(const string& fileName) const
 
     return mat;
 }
-#pragma endregion
-
-#pragma region non-member functions
-
-template<typename T>
-T str2T(const string& str)
-{
-    istringstream iss(str);
-    T val;
-    iss >> val;
-    if (iss.fail())
-        throw std::invalid_argument("Error: Invalid value: " + str);
-    return val;
-}
-
 #pragma endregion
 
 #pragma endregion

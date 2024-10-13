@@ -233,4 +233,5 @@ CMakeFiles/ML.dir/src/main.cpp.o: /home/twh/machineLearning/src/main.cpp \
  /usr/include/c++/11/bits/random.tcc /usr/include/c++/11/numeric \
  /usr/include/c++/11/bits/stl_numeric.h \
  /usr/include/c++/11/pstl/glue_numeric_defs.h \
- /home/twh/machineLearning/include/ML/modelBase.h
+ /home/twh/machineLearning/include/ML/modelBase.h \
+ /home/twh/machineLearning/include/ML/evaluation.h
