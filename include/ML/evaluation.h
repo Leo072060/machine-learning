@@ -11,14 +11,14 @@ template<typename T = double>
 class RegressionEvaluation:public ManagedClass
 {
 public:
-    RegressionEvaluation():administrator(),
-                           TARGET_Y(administrator),PRED_Y(administrator),
-                           target_y_MINUS_pred_y(administrator),target_y_MINUS_mean_target_y(administrator),
-                           MAE(administrator),
-                           MSE(administrator),
-                           RMSE(administrator),
-                           MAPE(administrator),
-                           R2(administrator) {}
+    RegressionEvaluation():ManagedClass(),
+                           TARGET_Y(this->administrator),PRED_Y(this->administrator),
+                           target_y_MINUS_pred_y(this->administrator),target_y_MINUS_mean_target_y(this->administrator),
+                           MAE(this->administrator),
+                           MSE(this->administrator),
+                           RMSE(this->administrator),
+                           MAPE(this->administrator),
+                           R2(this->administrator) {}
 public:
     void fit(const Mat<T>& pred_y, const Mat<T>& target_y);
     void report();
@@ -30,7 +30,6 @@ public:
 
 private:
     mutable bool isFitted = false;
-    Administrator administrator;
     mutable ManagedVal<Mat<T>> TARGET_Y;
     mutable ManagedVal<Mat<T>> PRED_Y;
     mutable ManagedVal<Mat<T>> target_y_MINUS_pred_y;
@@ -59,7 +58,7 @@ void RegressionEvaluation<T>::fit(const Mat<T>& pred_y, const Mat<T>& target_y)
     Mat<T> tmp(target_y.size_row(),1);
     // calculate target_y_MINUS_pred_y
     for(size_t i = 0; i < target_y.size_row(); ++i)
-        tmp.iloc(i,0) = target_y.iloc(i,0) - target_y.iloc(i,0);
+        tmp.iloc(i,0) = target_y.iloc(i,0) - pred_y.iloc(i,0);
     this->record(target_y_MINUS_pred_y,tmp);
     // calculate target_y_MINUS_mean_target_y
     for(size_t i = 0; i < target_y.size_row(); ++i)
@@ -71,12 +70,12 @@ template<typename T>
 void RegressionEvaluation<T>::report()
 {
     if(!isFitted) throw runtime_error("Error: The model must be fitted before generating the report.");
-    cout<<"\tLinear Regression Model Performance Report\n";
-    cout<<"mean absolute error"           <<"\t"<<mean_absolute_error()           <<endl;
-    cout<<"mean squared error"            <<"\t"<<mean_squared_error()            <<endl;
-    cout<<"root mean squared error"       <<"\t"<<root_mean_squared_error()       <<endl;
+    cout<<"\t------- Linear Regression Model Performance Report -------\n";
+    cout<<"mean absolute error           "<<"\t"<<mean_absolute_error()           <<endl;
+    cout<<"mean squared error            "<<"\t"<<mean_squared_error()            <<endl;
+    cout<<"root mean squared error       "<<"\t"<<root_mean_squared_error()       <<endl;
     cout<<"mean absolute percentage error"<<"\t"<<mean_absolute_percentage_error()<<endl;
-    cout<<"r2 score"                      <<"\t"<<r2_score()                      <<endl;
+    cout<<"r2 score                      "<<"\t"<<r2_score()                      <<endl;
 }
 template<typename T>
 T RegressionEvaluation<T>::mean_absolute_error()

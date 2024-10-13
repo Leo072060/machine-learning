@@ -11,6 +11,7 @@
 		"commands" : 
 		[
 			"add_executable",
+			"add_definitions",
 			"include_directories"
 		],
 		"files" : 
@@ -25,13 +26,19 @@
 			{
 				"command" : 0,
 				"file" : 0,
-				"line" : 8,
+				"line" : 11,
 				"parent" : 0
 			},
 			{
 				"command" : 1,
 				"file" : 0,
-				"line" : 4,
+				"line" : 5,
+				"parent" : 0
+			},
+			{
+				"command" : 2,
+				"file" : 0,
+				"line" : 7,
 				"parent" : 0
 			}
 		]
@@ -39,10 +46,17 @@
 	"compileGroups" : 
 	[
 		{
-			"includes" : 
+			"defines" : 
 			[
 				{
 					"backtrace" : 2,
+					"define" : "DEBUG"
+				}
+			],
+			"includes" : 
+			[
+				{
+					"backtrace" : 3,
 					"path" : "/home/twh/machineLearning/include"
 				}
 			],

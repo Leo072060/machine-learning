@@ -11,7 +11,6 @@
 
 using namespace std;
 
-#define DEBUG
 
 int main()
 {
@@ -33,8 +32,10 @@ int main()
     auto test_y = test_data.extract_columns(5,6);
     // display_rainbow(test_x);
     auto pred_y = model.predict(test_x);
+    display_rainbow(concat_horizontal(pred_y,test_y));
     RegressionEvaluation RE;
     RE.fit(pred_y,test_y);
     RE.report();
+   cout<<RE.mean_absolute_error();
     return 0;
 }
