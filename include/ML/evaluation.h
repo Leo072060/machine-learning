@@ -83,7 +83,7 @@ T RegressionEvaluation<T>::mean_absolute_error()
 {
     if(MAE.readable()) return MAE.read();
     if(!isFitted) throw runtime_error("Error: The model must be fitted before generating mean absolute error.");
-    record(MAE,mean(abs(target_y_MINUS_pred_y.read())));
+    this->record(MAE,mean(abs(target_y_MINUS_pred_y.read())));
     return MAE.read();
 }
 template<typename T>
@@ -91,7 +91,7 @@ T RegressionEvaluation<T>::mean_squared_error()
 {
     if(MSE.readable()) return MSE.read();
     if(!isFitted) throw runtime_error("Error: The model must be fitted before generating mean squared error.");
-    record(MSE,mean(power(target_y_MINUS_pred_y.read(),2)));
+    this->record(MSE,mean(power(target_y_MINUS_pred_y.read(),2)));
     return MSE.read();
 }
 template<typename T>
@@ -99,7 +99,7 @@ T RegressionEvaluation<T>::root_mean_squared_error()
 {
     if(RMSE.readable()) return RMSE.read();
     if(!isFitted) throw runtime_error("Error: The model must be fitted before generating root mean squared error.");
-    record(RMSE,square(mean_squared_error()));
+    this->record(RMSE,square(mean_squared_error()));
     return root_mean_squared_error.read();
 }
 template<typename T>
@@ -107,7 +107,7 @@ T RegressionEvaluation<T>::mean_absolute_percentage_error()
 {
     if(MAPE.readable()) return MAPE.read();
     if(!isFitted) throw runtime_error("Error: The model must be fitted before generating mean absolute percentage error.");
-    record(mean(abs(target_y_MINUS_pred_y.read()/target_y)));
+    this->record(mean(abs(target_y_MINUS_pred_y.read()/target_y)));
     return MAPE.read();
 }
 template<typename T>
@@ -115,7 +115,7 @@ T RegressionEvaluation<T>::r2_score()
 {
     if(R2.readable()) return R2.read();
     if(!isFitted) throw runtime_error("Error: The model must be fitted before generating r2 score.");
-    R2.record(R2,1-sum(power(target_y_MINUS_pred_y.read(),2))/sum(power(target_y_MINUS_mean_target_y.read(),2)));
+    this->record(R2,1-sum(power(target_y_MINUS_pred_y.read(),2))/sum(power(target_y_MINUS_mean_target_y.read(),2)));
     return R2.read();
 }
 #pragma endregion

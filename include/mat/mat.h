@@ -75,7 +75,7 @@ namespace P
 #pragma endregion
 
 template<class T = double>
-class Mat
+class Mat : public ManagedClass
 {
 public:
 	Mat ();
@@ -103,7 +103,7 @@ public:
     Mat<T>        operator*        (const Mat<T>& rhs)                            const;                                 
     Mat<T>        operator/        (const Mat<T>& rhs)                            const;   
                     
-	T& 			  iloc		       (const size_t i, const size_t j)					    { refresh(); return data[i][j]; }
+	T& 			  iloc		       (const size_t i, const size_t j)					    { this->refresh(); return data[i][j]; }
 	const T&	  iloc		       (const size_t i, const size_t j)               const { return data[i][j]; }
     Mat<T>        iloc_row         (const size_t i)                               const { return extract_rows(i,i+1); }
     Mat<T>        iloc_column      (const size_t i)                               const { return extract_columns(i,i+1); }
@@ -150,11 +150,6 @@ public:
 private:
 	T*			   operator[]		 (const size_t i)		                         { return data[i]; }
 	const T* const operator[]		 (const size_t i)						   const { return data[i]; }
-	template<typename Y>
-	void		   record			 (ManagedVal<Y>& managedVal, const Y& val) const;
-	void		   refresh			 ()                                        const;
-	void		   copy_calculatedVal(const Mat<T>& other)                     const;
-
 	// friend functions:
 	friend Dict<Mat<T>>	LU<T>			   (const Mat<T>& mat);
 	friend T			det<T>			   (const Mat<T>& mat);
@@ -173,18 +168,13 @@ private:
 	string*				colNames	= nullptr;
 	size_t				rowSize		= 0;
 	size_t				colSize		= 0;
-	mutable bool		isRefreshed = true;
-	const Administrator	administrator;
 	// calculated value
 	mutable ManagedVal<T>		DET;
-	mutable ManagedVal<Mat<T>>	L;
-	mutable ManagedVal<Mat<T>>	U;
-	mutable ManagedVal<Mat<T>>	P;
-    mutable ManagedVal<T>  MEAN;
+    mutable ManagedVal<T>       MEAN;
     mutable ManagedVal<Mat<T>>  MEAN_ROW;
     mutable ManagedVal<Mat<T>>  MEAN_COLUMN;
     mutable ManagedVal<Mat<T>>  SUM;
-    mutable ManagedVal<T>  SUM_ROW;
+    mutable ManagedVal<T>       SUM_ROW;
     mutable ManagedVal<Mat<T>>  SUM_COLUMN;
 };
 
@@ -192,10 +182,10 @@ private:
 
 #pragma region lifecycle management
 template<typename T>
-Mat<T>::Mat():DET(administrator), 
-              L(administrator),U(administrator),P(administrator),
-              MEAN(administrator),MEAN_ROW(administrator),MEAN_COLUMN(administrator),
-              SUM(administrator),SUM_ROW(administrator),SUM_COLUMN(administrator) {}
+Mat<T>::Mat():ManagedClass(),
+              DET(this->administrator), 
+              MEAN(this->administrator),MEAN_ROW(this->administrator),MEAN_COLUMN(this->administrator),
+              SUM(this->administrator),SUM_ROW(this->administrator),SUM_COLUMN(this->administrator) {}
 template<typename T>
 Mat<T>::Mat(const Mat<T>& other) :Mat() 
 {
@@ -214,7 +204,6 @@ Mat<T>::Mat(const Mat<T>& other) :Mat()
 	}
 	for (size_t i = 0; i < colSize; ++i) 
 		colNames[i] = other.colNames[i];
-	copy_calculatedVal(other);
 }
 template<typename T>
 Mat<T>::Mat(const size_t rowSize,const size_t colSize) :Mat() 
@@ -271,7 +260,6 @@ void Mat<T>::operator=(const Mat<T>& other) {
 		for (size_t j = 0; j < colSize; ++j) 
 			data[i][j] = other[i][j];
 	}
-	copy_calculatedVal(other);
 }
 template<typename T>
 void Mat<T>::operator+=(const T& rhs)
@@ -279,7 +267,7 @@ void Mat<T>::operator+=(const T& rhs)
     for(size_t i = 0; i < rowSize; ++i)
         for(size_t j = 0; j < colSize; ++j)
             data[i][j]+=rhs;
-    refresh();
+    this->refresh();
 }
 template<typename T>
 void Mat<T>::operator-=(const T& rhs)
@@ -287,7 +275,7 @@ void Mat<T>::operator-=(const T& rhs)
     for(size_t i = 0; i < rowSize; ++i)
         for(size_t j = 0; j < colSize; ++j)
             data[i][j]-=rhs;
-    refresh();
+    this->refresh();
 }
 template<typename T>
 void Mat<T>::operator*=(const T& rhs)
@@ -295,7 +283,7 @@ void Mat<T>::operator*=(const T& rhs)
     for(size_t i = 0; i < rowSize; ++i)
         for(size_t j = 0; j < colSize; ++j)
             data[i][j]*=rhs;
-    refresh();
+    this->refresh();
 }
 template<typename T>
 void Mat<T>::operator/=(const T& rhs)
@@ -303,7 +291,7 @@ void Mat<T>::operator/=(const T& rhs)
     for(size_t i = 0; i < rowSize; ++i)
         for(size_t j = 0; j < colSize; ++j)
             data[i][j]/=rhs;
-    refresh();
+    this->refresh();
 }
 template<typename T>
 Mat<T> Mat<T>::operator+(const T& rhs) const
@@ -411,7 +399,7 @@ T& Mat<T>::loc(const string& rowName, const string& colName)
 			break;
 	if(j==colSize)	
 		throw invalid_argument("Error: Column name '" + colName + "' not found.");
-	refresh();
+	this->refresh();
 	return data[i][j];
 }
 template<typename T>
@@ -435,14 +423,14 @@ void Mat<T>::clear_rowNames()
 {
 	for (size_t i = 0; i < rowSize; ++i)
 		rowNames[i].clear();
-	refresh();
+	this->refresh();
 }
 template<typename T>
 void Mat<T>::clear_colNames()
 {
 	for (size_t i = 0; i < colSize; ++i)
 		colNames[i].clear();
-	refresh();
+	this->refresh();
 }
 template<typename T>
 void Mat<T>::swap_rows(const size_t a,const size_t b)
@@ -452,7 +440,7 @@ void Mat<T>::swap_rows(const size_t a,const size_t b)
 	if (a == b) return;
 	swap(data[a], data[b]);
 	swap(rowNames[a], rowNames[b]);
-	refresh();
+	this->refresh();
 }
 template<typename T>
 void Mat<T>::swap_columns(const size_t a,const size_t b)
@@ -463,7 +451,7 @@ void Mat<T>::swap_columns(const size_t a,const size_t b)
 	for (size_t i = 0; i < rowSize; ++i) 
 		swap(data[a][i],data[b][i]);
 	swap(colNames[a], colNames[b]);
-	refresh();
+	this->refresh();
 }
 template<typename T>
 Mat<T> Mat<T>::extract(const size_t startRow, const size_t startCol, const size_t endRow, const size_t endCol) const
@@ -538,7 +526,7 @@ void Mat<T>::drop_rows(const size_t startRow, const size_t endRow)
     data     = new_data;
     rowNames = new_rowNames;
     rowSize  = new_rowSize;
-    refresh();
+    this->refresh();
 }
 template<typename T>
 void Mat<T>::drop_columns(const size_t startCol, const size_t endCol)
@@ -567,7 +555,7 @@ void Mat<T>::drop_columns(const size_t startCol, const size_t endCol)
     delete[] colNames;
     colNames = new_colNames;
     colSize  = new_colSize;
-    refresh();
+    this->refresh();
 }
 template<typename T>
 void Mat<T>::drop_rows(const set<size_t>& rows)
@@ -604,7 +592,7 @@ void Mat<T>::transpose()
 	data = new_data;
 	swap(rowSize, colSize);
 	swap(rowNames, colNames);
-	refresh();
+	this->refresh();
 }
 template<typename T>
 void Mat<T>::dot(const Mat<T>& other)
@@ -633,7 +621,7 @@ void Mat<T>::dot(const Mat<T>& other)
 		delete[] data[i];
 	data = new_data;
 	colSize = other.colSize;
-	refresh();
+	this->refresh();
 }
 template<typename T>
 void Mat<T>::fill(const T& val)
@@ -695,29 +683,6 @@ void Mat<T>::concat_vertical(const Mat<T>& other)
 	delete[] rowNames;
     rowNames = new_rowNames;
 	rowSize  = new_rowSize; 
-}
-template<typename T> template<typename Y>
-void Mat<T>::record(ManagedVal<Y>& managedVal, const Y& val) const
-{
-	SetPermission(administrator, managedVal, PERMISSION_WRITE);
-    managedVal.write(val);
-    SetPermission(administrator,managedVal,PERMISSION_READ);
-	isRefreshed = false;
-}
-template<typename T>
-void Mat<T>::refresh() const
-{
-	if (isRefreshed) return;
-	SetPermission(administrator, DET, PERMISSION_LOWEST);
-	isRefreshed = true;
-}
-template<typename T>
-void Mat<T>::copy_calculatedVal(const Mat<T>& other) const
-{
-	Copy(administrator, DET	, other.DET);
-	Copy(administrator, L	, other.L);
-	Copy(administrator, U	, other.U);
-	Copy(administrator, P	, other.P);
 }
 #pragma endregion
 
@@ -925,7 +890,7 @@ template<typename T>
 T mean (const Mat<T>& mat)
 {
     if(mat.MEAN.readable()) return mat.MEAN.read();
-    record(mat.administrator,mat.MEAN,(mean_row(mat)).iloc(0,0));
+    mat.record(mat.administrator,mat.MEAN,(mean_row(mat)).iloc(0,0));
     return mat.MEAN.read();
 }
 template<typename T> 
@@ -942,7 +907,7 @@ Mat<T> mean_row(const Mat<T>& mat)
         }
         ret.iloc(i,0) = mean;
     }
-    record(mat.administrator,mat.MEAN_ROW,ret);
+    mat.record(mat.administrator,mat.MEAN_ROW,ret);
     return mat.MEAN_ROW.read();
 }
 template<typename T> 
@@ -959,14 +924,14 @@ Mat<T> mean_column(const Mat<T>& mat)
         }
         ret.iloc(0,i) = mean;
     }
-    record(mat.administrator,mat.MEAN_COLUMN,ret);
+    mat.record(mat.administrator,mat.MEAN_COLUMN,ret);
     return mat.MEAN_COLUMN.read();
 }
 template<typename T> 
 Mat<T> sum(const Mat<T>& mat)
 {
     if(mat.SUM.readable()) return mat.SUM.read();
-    record(sum_column(sum_row(mat)));
+    mat.record(sum_column(sum_row(mat)));
     return mat.SUM.read();
 }
 template<typename T> 
@@ -977,7 +942,7 @@ Mat<T> sum_row(const Mat<T>& mat)
     for(size_t i = 0; i < mat.size_row(); ++i)
         for(size_t j = 0; j < mat.size_column(); ++j)
             ret.iloc(i,0) += mat.iloc(i,j);
-    record(mat.SUM_ROW,ret);
+    mat.record(mat.SUM_ROW,ret);
     return mat.SUM_ROW.read();
 }
 template<typename T> 
@@ -988,7 +953,7 @@ Mat<T> sum_column(const Mat<T>& mat)
     for(size_t i = 0; i < mat.size_column(); ++i)
         for(size_t j = 0; j < mat.size_row(); ++j)
             ret.iloc(0,i) += mat.iloc(j,i);
-    record(mat.SUM_COLUMN,ret);
+    mat.record(mat.SUM_COLUMN,ret);
     return mat.SUM_COLUMN.read();
 }
 template<typename T> 
@@ -1108,7 +1073,7 @@ size_t P::CountSwaps(const Mat<T>& P)
 		size_t swapsCount = 0;
 		// verify if it is a P matrix 
 		// and record the column positions where each row has a value of 1
-		vector<size_t> record(P.size_row());
+		vector<size_t> rec(P.size_row());
 		for (size_t i = 0; i < P.size_row(); ++i)
 		{
 			bool find_1 = false;
@@ -1118,7 +1083,7 @@ size_t P::CountSwaps(const Mat<T>& P)
 				{
 					if (find_1 == false)
 					{
-						record[i] = j;
+						rec[i] = j;
 						find_1    = true;
 					}
 					else  
@@ -1131,14 +1096,14 @@ size_t P::CountSwaps(const Mat<T>& P)
 
 		for (size_t i = 0; i < P.size_row(); ++i)
 		{
-			if (record[i] != i)
+			if (rec[i] != i)
 			{
 				size_t j = i + 1;
 				for (; j < P.size_row(); ++j)
 				{
-					if (record[j] == i)
+					if (rec[j] == i)
 					{
-						record[j] = record[i];
+						rec[j] = rec[i];
 						++swapsCount;
 						break;
 					}
