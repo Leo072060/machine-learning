@@ -12,6 +12,7 @@
 #include"kits/managed.h"
 #include"mat/mat.h"
 #include"kits/dict.h"
+#include"math/numerical_optimization.h"
 
 
 
@@ -113,7 +114,7 @@ public:
 	// model parameters
 	double learning_rate = 0.0003;
 	size_t batch_size = 100;
-	size_t iterations = 1000;
+	size_t iterations = 1700;
 public:
 	// calculated value
 	ManagedVal<Mat<T>> THETAS;
@@ -126,13 +127,6 @@ public:
 template<typename T>
 void LinearRegression<T>::train(const Mat<T>& x, const Mat<T>& y)
 {
-	if (y.size_column() != 1)
-		throw invalid_argument("Error: Matrix y must be single-column matrix.");
-	if (x.size_row() != y.size_row())
-		throw invalid_argument("Error: Matrix x and y must have the same number of rows.");
-	if (x.size_row() < 1)
-		throw invalid_argument("Error: Matrix x must have at least one row.");
-
     Mat<T> ones(x.size_row(),1);
     for(size_t i = 0; i < x.size_row(); ++i) ones.iloc(i,0) = 1;
     Mat<T> w = concat_horizontal(x,ones);
@@ -201,7 +195,7 @@ public:
 public:
 	void    train(const Mat<T>& x, const Mat<T>& y) override;
 	Mat<T>  predict(const Mat<T>& x) const			override;
-    Dict<T> get_trainedParameters()  const          override;
+
 // * * * * * * * attributes * * * * * * *
 public:
 	// model parameters
@@ -216,17 +210,9 @@ private:
 #pragma region function definition
 
 #pragma region member functions
-
 template<typename T>
 void Log_LinearRegression<T>::train(const Mat<T>& x, const Mat<T>& y)
 {
-	if (y.size_column() != 1)
-		throw invalid_argument("Error: Matrix y must be single-column matrices.");
-	if (x.size_row() != y.size_row())
-		throw invalid_argument("Error: Matrix x and y must have the same number of rows.");
-	if (x.size_row() < 1)
-		throw invalid_argument("Error: Matrix x must have at least one row.");
-
     Mat<T> ones(x.size_row(),1);
     ones.fill(1);
     Mat<T> w = concat_horizontal(x,ones);
@@ -278,21 +264,111 @@ Mat<T> Log_LinearRegression<T>::predict(const Mat<T>& x) const
     Mat<T> w = concat_horizontal(x,ones);
 	return w.dot(transpose(x));
 }
+#pragma endregion 
+
+#pragma endregion 
+
+
+
+
+
+
+
 template<typename T>
-Dict<T> Log_LinearRegression<T>::get_trainedParameters() const 
+class LogisticRegression : ClassificationModelBase<T>
 {
-    Dict<T> ret;
-    for(size_t i = 0; i < THETAS.read().size_column(); ++i)
+public:
+    void		  train                (const Mat<T>& x, const Mat<string>& y) override;
+	Mat<string>   predict              (const Mat<T>& x) const                 override;
+    Mat<T>        predict_probabilities(const Mat<T>& x) const; 
+    static Mat<T> predict_probabilities(const Mat<T>& x,const Mat<T>& thetas);
+
+public:
+	// model parameters
+	double learning_rate = 0.0003;
+	size_t batch_size = 100;
+	size_t iterations = 3000;
+private:
+	// calculated value
+	ManagedVal<Mat<T>> THETAS;
+};
+
+#pragma region function definition
+
+#pragma region member functions
+template<typename T>
+void LogisticRegression<T>::train(const Mat<T>& x, const Mat<string>& y)
+{
+    if (y.size_column() != 1)
+		throw invalid_argument("Error: Matrix y must be single-column matrices.");
+	if (x.size_row() != y.size_row())
+		throw invalid_argument("Error: Matrix x and y must have the same number of rows.");
+	if (x.size_row() < 1)
+		throw invalid_argument("Error: Matrix x must have at least one row.");
+    Mat<string> types = unique(y);
+    if(types.size() != 2)  
+        throw invalid_argument("Error: The target matrix y must contain exactly two unique classes for binary classification.");
+
+    Mat<T> mumerical_y(y.size_row(),y.size_column());
+    for(size_t i = 0; i < y.size_row(); ++i)
+        mumerical_y.iloc(i,0) = (types.iloc(0,0) == y.iloc(i,0) ? 0 : 1);
+
+    Mat<T> ones(x.size_row(),1);
+    ones.fill(1);
+    Mat<T> w = concat_horizontal(x,ones);
+    Mat<T> thetas(1,x.size_column()+1);
+
+    // start training
+    for(size_t i = 0; i < iterations; ++i)
     {
-        string parameterName = "theta" + to_string(i);
-        ret.insert(parameterName,THETAS.read().iloc(0,i));
+    cout<<"Output of the training iteration : "<<i+1<<endl;
+    // generate random numbers
+    if(x.size_row() < batch_size)
+         throw out_of_range("Error: Batch size is larger than the available rows.");
+    set<size_t> randomNums;
+    random_device rd;
+    mt19937 gen(rd()); 
+    uniform_int_distribution<> dis(0, x.size_row()-1);
+    while (randomNums.size() < batch_size) 
+        randomNums.insert(dis(gen)); 
+    
+    Mat<T> tmp_thetas(thetas);
+
+    for(size_t i = 0; i < w.size_column(); ++i)
+    {
+        T tmp_theta_i = 0;
+        for(auto& e:randomNums)
+        {
+            tmp_theta_i += learning_rate*((mumerical_y.iloc_row(e) - LogisticRegression<T>::predict_probabilities(transpose(w.iloc_row(e)),thetas)) * w.iloc(e,i)).iloc(0,0);
+        }
+        tmp_thetas.iloc(0,i) += (tmp_theta_i);
     }
-	return ret;
+    thetas = tmp_thetas;
+    display_rainbow(thetas);
+    }
+    this->record(THETAS,thetas);
+    
 }
+#pragma endregion
 
-#pragma endregion 
+#pragma region static functions
+template<typename T>
+Mat<T> LogisticRegression<T>::predict_probabilities(const Mat<T>& x,const Mat<T>& thetas)
+{
+	if (x.size_column()+1 != thetas.size_column())
+         throw invalid_argument("Error: Number of columns in x must be equal to number of columns in thetas minus one.");
 
-#pragma endregion 
+    Mat<T> y(x.size_row(),1);
+    Mat<T> ones(x.size_row(),1);
+    ones.fill(1);
+    Mat<T> w = concat_horizontal(x,ones);
+	w.dot(transpose(thetas));
+    for(size_t i =0; i < x.size_row(); ++i)
+        y.iloc(i,0) = 1 / (1 + exp(-w.iloc(i,0)));
+    return y;
+}
+#pragma endregion
 
+#pragma endregion
 
 #endif // LINEAR_MODEL_H

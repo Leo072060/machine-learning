@@ -17,7 +17,7 @@ private:
 public:
     ManagedVal<Mat<T>> x_max;
     ManagedVal<Mat<T>> x_min;
-}
+};
 
 
 #pragma function definition

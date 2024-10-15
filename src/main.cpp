@@ -11,31 +11,41 @@
 
 using namespace std;
 
+#define TEST_Mat_sort_row
 
 int main()
 {
 
-    string csvFileName = "../test/regression_dataset.csv";
+    string dataFileName = "../test/random_matrix.csv";
     csv_Loader<double> loader;
-    loader.with_which_name = WITH_COLNAME;
-    Mat<double> data = loader.load_matrix(csvFileName);
-    auto train_data = data.extract_rows(0,data.size_row()*0.7);
-    auto test_data  = data.extract_rows(data.size_row()*0.7,data.size_row());
+    Mat<double> DATA = loader.load_matrix(dataFileName);
+    display_rainbow(DATA);
+    cout<<"FLAG"<<endl;
 
+    // test LinearRegression
+    #ifdef TEST_LinearRegression
+    auto train_data = DATA.extract_rows(0,DATA.size_row()*0.7);
+    auto test_data  = DATA.extract_rows(DATA.size_row()*0.7,DATA.size_row());
     auto train_x = train_data.extract_columns(0,5);
     auto train_y = train_data.extract_columns(5,6);
     LinearRegression<double> model;
     model.train(train_x,train_y);
     display_rainbow(model.THETAS.read());
-
     auto test_x = test_data.extract_columns(0,5);
     auto test_y = test_data.extract_columns(5,6);
-    // display_rainbow(test_x);
     auto pred_y = model.predict(test_x);
-    display_rainbow(concat_horizontal(pred_y,test_y));
     RegressionEvaluation RE;
     RE.fit(pred_y,test_y);
     RE.report();
-   cout<<RE.mean_absolute_error();
+    #endif
+
+    // test void Mat<T>::sort_row(const size_t i, const ORDER order)
+    #ifdef TEST_Mat_sort_row
+    auto data = DATA;
+    display_rainbow(data);
+    data.sort_column(0,ASCE);
+    display_rainbow(data);
+    #endif
+
     return 0;
 }

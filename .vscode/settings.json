@@ -3,6 +3,10 @@
         "*.tcc": "cpp",
         "functional": "cpp",
         "ostream": "cpp",
-        "stdexcept": "cpp"
+        "stdexcept": "cpp",
+        "string": "cpp",
+        "new": "cpp",
+        "array": "cpp",
+        "string_view": "cpp"
     }
 }

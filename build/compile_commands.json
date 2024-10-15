@@ -1,0 +1,12 @@
+[
+{
+  "directory": "/home/twh/machineLearning/build",
+  "command": "/usr/bin/g++ -DDEBUG -I/home/twh/machineLearning/include -g -o CMakeFiles/ML.dir/src/main.cpp.o -c /home/twh/machineLearning/src/main.cpp",
+  "file": "/home/twh/machineLearning/src/main.cpp"
+},
+{
+  "directory": "/home/twh/machineLearning/build",
+  "command": "/usr/bin/g++ -DDEBUG -I/home/twh/machineLearning/include -g -o CMakeFiles/ML.dir/src/managed.cpp.o -c /home/twh/machineLearning/src/managed.cpp",
+  "file": "/home/twh/machineLearning/src/managed.cpp"
+}
+]

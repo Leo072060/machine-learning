@@ -28,6 +28,9 @@ using WITH_WHICH_NAME = uint8_t;
 #define WITH_ROWNAME 0b11111110
 #define WITH_COLNAME 0b11111101
 #define WITH_NAME    0b11111100
+using ORDER = int;
+#define ASCE 0
+#define DESC 1
 #pragma endregion
 
 #pragma region forward declaration
@@ -58,6 +61,8 @@ template<typename T> Mat<T>       abs              (const Mat<T>& mat);
 
 template<typename T> Mat<T>       concat_horizontal(const Mat<T>& left, const Mat<T>& right);
 template<typename T> Mat<T>       concat_vertical  (const Mat<T>& top, const Mat<T>& bottom);
+
+template<typename T> Mat<T>       unique           (const Mat<T>& mat);
 
 template<typename T> void         display          (const Mat<T>& mat, WITH_WHICH_NAME withWhichName = WITHOUT_NAME);
 template<typename T> void         display_rainbow  (const Mat<T>& mat, WITH_WHICH_NAME withWhichName = WITHOUT_NAME);
@@ -115,6 +120,7 @@ public:
 	void          clear_rowNames   ();
 	void          clear_colNames   ();
 
+    size_t        size             ()                                             const { return rowSize*colSize; }
 	size_t		  size_row	       ()                                             const { return rowSize; }
 	size_t		  size_column	   ()                                             const { return colSize; }
 
@@ -141,6 +147,9 @@ public:
 
 	void          concat_horizontal(const Mat<T>& other);
 	void          concat_vertical  (const Mat<T>& other);
+
+    void          sort_row         (const size_t i, ORDER order = ASCE);
+    void          sort_column      (const size_t i, ORDER order = ASCE);
 private:
 	T*			  operator[]	   (const size_t i)		                                { return data[i]; }
 	const T*const operator[]	   (const size_t i)						          const { return data[i]; }
@@ -661,6 +670,51 @@ void Mat<T>::concat_vertical(const Mat<T>& other)
     rowNames = new_rowNames;
 	rowSize  = new_rowSize; 
 }
+template<typename T>
+void Mat<T>::sort_row(const size_t i, const ORDER order)
+{
+    if(i >= rowSize) throw out_of_range("Error: Row index " + to_string(i) + " is out of range. Maximum row index is " + to_string(rowSize - 1) + ".");
+    function<bool(const size_t,const size_t)> cmp;
+    if     (order == ASCE) cmp = [this,i](const size_t lhs, const size_t rhs) { return data[i][lhs] < data[i][rhs]; };
+    else if(order == DESC) cmp = [this,i](const size_t lhs, const size_t rhs) { return data[i][lhs] > data[i][rhs]; };
+    else throw invalid_argument("Error: Invalid order argument. Expected ASCE or DESC.");
+ 
+    vector<size_t> index(rowSize); for(size_t i = 0; i < rowSize; ++i) index[i] = i;
+    sort(index.begin(),index.end(),cmp);
+
+    T** new_data = new T*[rowSize];
+    string* new_rowNames = new string[rowSize];
+    for(size_t i = 0; i < rowSize; ++i) 
+    {
+        new_data[i] = data[index[i]];         data[index[i]] = nullptr;
+        new_rowNames[i] = rowNames[index[i]];        rowNames[index[i]] = nullptr;
+
+    }
+    delete[] data;     data = new_data;
+    delete[] rowNames; rowNames = new_rowNames;
+}
+template<typename T>
+void Mat<T>::sort_column(const size_t i, const ORDER order)
+{
+    if(i >= colSize) throw out_of_range("Error: Column index " + to_string(i) + " is out of range. Maximum column index is " + to_string(colSize - 1) + ".");
+    function<bool(const size_t,const size_t)> cmp;
+    if     (order == ASCE) cmp = [this,i](const size_t lhs, const size_t rhs) { return data[lhs][i] < data[rhs][i]; };
+    else if(order == DESC) cmp = [this,i](const size_t lhs, const size_t rhs) { return data[lhs][i] > data[rhs][i]; };
+    else throw invalid_argument("Error: Invalid order argument. Expected ASCE or DESC.");
+
+    vector<size_t> index(rowSize); for(size_t i = 0; i < rowSize; ++i) index[i] = i;
+    sort(index.begin(),index.end(),cmp);
+    
+    T** new_data = new T*[rowSize];
+    string* new_rowNames = new string[rowSize];
+    for(size_t i = 0; i < rowSize; ++i) 
+    {
+        new_data[i]     = data[index[i]];     data[index[i]] = nullptr;
+        new_rowNames[i] = rowNames[index[i]]; rowNames[index[i]] = nullptr;
+    }
+    delete[] data;     data = new_data;
+    delete[] rowNames; rowNames = new_rowNames;
+}
 #pragma endregion
 
 #pragma region non-member functions
@@ -963,6 +1017,20 @@ Mat<T>& concat_vertical(const Mat<T>& top, const Mat<T>& bottom)
 {
     Mat<T> ret(top);
     ret.concat_vertical(bottom);
+    return ret;
+}
+
+template<typename T> 
+Mat<T> unique(const Mat<T>& mat)
+{
+    set<T> S;
+    for(size_t i = 0; i < mat.size_row(); ++i)
+        for(size_t j = 0; j < mat.size_column(); ++j)
+            S.insert(mat.iloc(i,j));
+    Mat<T> ret(1,S.size());
+    size_t i = 0;
+    for(auto &e : S)
+        ret.iloc(0,i++) = e;
     return ret;
 }
 

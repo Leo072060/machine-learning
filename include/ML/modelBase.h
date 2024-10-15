@@ -12,6 +12,7 @@ using namespace std;
 
 
 
+
 template<class T>
 class RegressionModelBase:public ManagedClass
 {
@@ -24,6 +25,7 @@ public:
 	virtual Mat<T>  predict(const Mat<T>& x) const			  = 0;
 
 // * * * * * * * attributes * * * * * * *
+
 };
 
 
@@ -44,6 +46,7 @@ public:
 	virtual Mat<string> predict(const Mat<T>& x) const			       = 0;
 
 // * * * * * * * attributes * * * * * * *
+
 };
 
 #endif // MODELBASE_H

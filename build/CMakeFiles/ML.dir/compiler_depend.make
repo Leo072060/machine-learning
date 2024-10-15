@@ -296,6 +296,7 @@ CMakeFiles/ML.dir/src/main.cpp.o: ../src/main.cpp \
   /usr/include/c++/11/bits/stl_numeric.h \
   /usr/include/c++/11/pstl/glue_numeric_defs.h \
   ../include/ML/modelBase.h \
+  ../include/math/numerical_optimization.h \
   ../include/ML/evaluation.h
 
 CMakeFiles/ML.dir/src/managed.cpp.o: ../src/managed.cpp \
@@ -488,6 +489,8 @@ CMakeFiles/ML.dir/src/managed.cpp.o: ../src/managed.cpp \
 
 
 ../include/ML/evaluation.h:
+
+../include/math/numerical_optimization.h:
 
 /usr/include/c++/11/bits/stl_numeric.h:
 
