@@ -64,6 +64,8 @@ template<typename T> Mat<T>       concat_vertical  (const Mat<T>& top, const Mat
 
 template<typename T> Mat<T>       unique           (const Mat<T>& mat);
 
+template<typename T> Mat<size_t>  find             (const Mat<T>& mat, T val);
+
 template<typename T> void         display          (const Mat<T>& mat, WITH_WHICH_NAME withWhichName = WITHOUT_NAME);
 template<typename T> void         display_rainbow  (const Mat<T>& mat, WITH_WHICH_NAME withWhichName = WITHOUT_NAME);
 
@@ -572,8 +574,10 @@ void Mat<T>::transpose()
 		new_data[i] = new T[rowSize];
 		for (size_t j = 0; j < rowSize; ++j)
 			new_data[i][j] = data[j][i];
-		delete[] data[i];
 	}
+
+    for (size_t i = 0; i < rowSize; i++)
+        delete[] data[i];
 	delete[] data;
 	data = new_data;
 	swap(rowSize, colSize);
@@ -679,19 +683,9 @@ void Mat<T>::sort_row(const size_t i, const ORDER order)
     else if(order == DESC) cmp = [this,i](const size_t lhs, const size_t rhs) { return data[i][lhs] > data[i][rhs]; };
     else throw invalid_argument("Error: Invalid order argument. Expected ASCE or DESC.");
  
-    vector<size_t> index(rowSize); for(size_t i = 0; i < rowSize; ++i) index[i] = i;
-    sort(index.begin(),index.end(),cmp);
-
-    T** new_data = new T*[rowSize];
-    string* new_rowNames = new string[rowSize];
-    for(size_t i = 0; i < rowSize; ++i) 
-    {
-        new_data[i] = data[index[i]];         data[index[i]] = nullptr;
-        new_rowNames[i] = rowNames[index[i]];        rowNames[index[i]] = nullptr;
-
-    }
-    delete[] data;     data = new_data;
-    delete[] rowNames; rowNames = new_rowNames;
+    this->transpose();
+    this->sort_column(i,order);
+    this->transpose();
 }
 template<typename T>
 void Mat<T>::sort_column(const size_t i, const ORDER order)
@@ -710,7 +704,7 @@ void Mat<T>::sort_column(const size_t i, const ORDER order)
     for(size_t i = 0; i < rowSize; ++i) 
     {
         new_data[i]     = data[index[i]];     data[index[i]] = nullptr;
-        new_rowNames[i] = rowNames[index[i]]; rowNames[index[i]] = nullptr;
+        new_rowNames[i] = rowNames[index[i]]; 
     }
     delete[] data;     data = new_data;
     delete[] rowNames; rowNames = new_rowNames;
@@ -1033,6 +1027,24 @@ Mat<T> unique(const Mat<T>& mat)
         ret.iloc(0,i++) = e;
     return ret;
 }
+
+template<typename T> 
+Mat<size_t> find(const Mat<T>& mat, T val)
+{
+    for(size_t i = 0; i < mat.size_row(); ++i)
+        for(size_t j = 0; j < mat.size_column(); ++i)
+        {
+            if(mat.iloc(i,j) == val)
+            {
+                Mat<size_t> ret(1,2);
+                ret.iloc(0,0) = i;
+                ret.iloc(0,1) = j;
+                return ret;
+            }
+        }
+    Mat<size_t> ret(0,0);
+    return ret;
+}   
 
 template<typename T>
 void display(const Mat<T>& mat, WITH_WHICH_NAME withWhichName)

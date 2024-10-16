@@ -61,7 +61,7 @@ template<typename T>
 void RegressionEvaluation<T>::report() const
 {
     if(!isFitted) throw runtime_error("Error: The model must be fitted before generating the report.");
-    cout<<"\t------- Linear Regression Model Performance Report -------\n";
+    cout<<"\t------- Regression Model Performance Report -------\n";
     cout<<"mean absolute error           "<<"\t"<<mean_absolute_error()           <<endl;
     cout<<"mean squared error            "<<"\t"<<mean_squared_error()            <<endl;
     cout<<"root mean squared error       "<<"\t"<<root_mean_squared_error()       <<endl;
@@ -151,12 +151,11 @@ public:
 public:
     void fit(const Mat<string>& pred_y, const Mat<string>& target_y) { const_cast<const RegressionEvaluation<T>*>(this)->fit(pred_y, target_y); }
     void report()            const;
-    Mat<T> confusionMatrix() const;
-    T accuracy()             const;
-    T error_rate()           const;
-    T percision()            const;
-    T recall()               const;
-    T f1()                   const;
+    Mat<size_t> confusionMatrix() const;
+    T           accuracy()        const;
+    T           error_rate()      const;
+    Mat<T>      percision()       const;
+    Mat<T>      recall()          const;
 private:
     void fit(const Mat<string>& pred_y, const Mat<string>& target_y) const;
 // * * * * * * * attributes * * * * * * *           
@@ -164,12 +163,11 @@ private:
     mutable bool isFitted = false;  
     mutable ManagedVal<Mat<string>> TARGET_Y;
     mutable ManagedVal<Mat<string>> PRED_Y;  
-    mutable ManagedVal<Mat<T>>      CONFUSION_MATRIX;      
+    mutable ManagedVal<Mat<size_t>> CONFUSION_MATRIX;      
     mutable ManagedVal<T>           ACCURACY;
     mutable ManagedVal<T>           ERROR_RATE;
-    mutable ManagedVal<T>           PERCISION;
-    mutable ManagedVal<T>           RECALL;
-    mutable ManagedVal<T>           F1;
+    mutable ManagedVal<Mat<T>>      PERCISION;
+    mutable ManagedVal<Mat<T>>      RECALL;
 };
 
 #pragma region lifecycle management
@@ -179,8 +177,7 @@ ClassificationEvaluation<T>::ClassificationEvaluation():ManagedClass(),
                                 ACCURACY(this->administrator),
                                 ERROR_RATE(this->administrator),
                                 PERCISION(this->administrator),
-                                RECALL(this->administrator),
-                                F1(this->administrator){}
+                                RECALL(this->administrator){}
 template<typename T> 
 ClassificationEvaluation<T>::ClassificationEvaluation(const Mat<string>& pred_y,const Mat<string>& target_y):ClassificationEvaluation()
 {
@@ -194,40 +191,98 @@ ClassificationEvaluation<T>::ClassificationEvaluation(const Mat<string>& pred_y,
 template<typename T>
 void ClassificationEvaluation<T>::report() const
 {
-
+    if(!isFitted) throw runtime_error("Error: The model must be fitted before generating the report.");
+    cout<<"\t------- Classification Model Performance Report -------\n";
+    cout<<"confusion matrix : "<<endl;
+    display(CONFUSION_MATRIX.read(),WITH_NAME);
+    cout<<"accuracy                      "<<"\t"<<accuracy()  <<endl;
+    cout<<"error rate                    "<<"\t"<<error_rate()<<endl;
+    cout<<"percision : "<<endl;
+    display(PERCISION.read(),WITH_NAME);
+    cout<<"recall : "<<endl;
+    display(RECALL.read(),WITH_NAME);
 }
 template<typename T>
-Mat<T> ClassificationEvaluation<T>::confusionMatrix() const
+Mat<size_t> ClassificationEvaluation<T>::confusionMatrix() const
 {
     if(!isFitted) throw runtime_error("Error: The model must be fitted before generating confusion matrix.");
     Mat<string> types_target_y = unique(TARGET_Y.read());
     Mat<string> types_pred_y = unique(PRED_Y.read());
-    
+    Mat<string> types_y = unique((types_target_y,types_pred_y));
+    if(types_y.size() > types_target_y.size()) 
+        throw logic_error("Error: Predicted labels contain classes not present in the target labels.");
+
+    types_target_y.sort_column(0);
+    Mat<size_t> confusionMat(types_target_y.size_column(),types_target_y.size_column());
+    for(size_t i = 0; i < TARGET_Y.read().size_row(); ++i)
+    {
+        confusionMat.iloc(find(types_target_y,TARGET_Y.read().iloc(i,0)).iloc(0,1),
+                          find(types_target_y,PRED_Y.read().iloc(i,0)).iloc(0,1)) += 1;
+    }
+    for(size_t i = 0; i < confusionMat.size_row(); ++i)
+    {
+        confusionMat.iloc_rowName(i) = types_target_y.iloc(0,i);
+        confusionMat.iloc_colName(i) = types_target_y.iloc(0,i);
+    }
+    this->record(CONFUSION_MATRIX,confusionMat);
+    return CONFUSION_MATRIX.read();
 }
 template<typename T>
 T ClassificationEvaluation<T>::accuracy() const
 {
+    if(!isFitted) throw runtime_error("Error: The model must be fitted before generating accuracy.");
+    if(ACCURACY.readable()) return ACCURACY.read();
 
+    T sum = sum(CONFUSION_MATRIX.read());
+    T sum_TP_TN = 0;
+    for(size_t i = 0; i < CONFUSION_MATRIX.read().size_row(); ++i)
+        sum_TP_TN += CONFUSION_MATRIX.read().iloc(i,i);
+    this->record(ACCURACY,sum_TP_TN/sum);
+    return ACCURACY.read();
 }
 template<typename T>
 T ClassificationEvaluation<T>::error_rate() const
 {
+    if(!isFitted) throw runtime_error("Error: The model must be fitted before generating error rate.");
+    if(ERROR_RATE.readable()) return ERROR_RATE.read();
 
+    this->record(ERROR_RATE,1-accuracy());
+    ERROR_RATE.read();
 }
 template<typename T>
-T ClassificationEvaluation<T>::percision() const
+Mat<T> ClassificationEvaluation<T>::percision() const
 {
+    if(!isFitted) throw runtime_error("Error: The model must be fitted before generating percision.");
+    if(PERCISION.readable()) return PERCISION.read();
 
+    Mat<T> sum_TP_FP = sum_column(CONFUSION_MATRIX.read());
+    Mat<T> ret(1,CONFUSION_MATRIX.read().size_row());
+    for(size_t i = 0; i < ret.size_row(); ++i)
+    {
+        ret.iloc(0,i) = CONFUSION_MATRIX.read().iloc(i,i)/sum_TP_FP.iloc(i,0);
+        ret.iloc_colName(i) = CONFUSION_MATRIX.read().iloc_colName(i);
+    }
+    ret.iloc_rowName(0) = "percision";
+    this->record(PERCISION,ret);
+
+    return PERCISION.read();
 }
 template<typename T>
-T ClassificationEvaluation<T>::recall() const
+Mat<T> ClassificationEvaluation<T>::recall() const
 {
+    if(!isFitted) throw runtime_error("Error: The model must be fitted before generating recall.");
+    if(RECALL.readable()) return RECALL.read();
 
-}
-template<typename T>
-T ClassificationEvaluation<T>::f1() const
-{
-
+    Mat<T> sum_TP_FP = sum_row(CONFUSION_MATRIX.read());
+    Mat<T> ret(1,CONFUSION_MATRIX.read().size_row());
+    for(size_t i = 0; i < ret.size_row(); ++i)
+    {
+        ret.iloc(0,i) = CONFUSION_MATRIX.read().iloc(i,i)/sum_TP_FP.iloc(i,0);
+        ret.iloc_colName(i) = CONFUSION_MATRIX.read().iloc_colName(i);
+    }
+    ret.iloc_rowName(0) = "recall";
+    this->record(RECALL,ret);
+    return RECALL.read();
 }
 template<typename T>
 void ClassificationEvaluation<T>::fit(const Mat<string>& pred_y, const Mat<string>& target_y) const
@@ -241,8 +296,8 @@ void ClassificationEvaluation<T>::fit(const Mat<string>& pred_y, const Mat<strin
     this->record(PRED_Y,pred_y);
     Mat<string> types_pred_y = unique(pred_y);
     Mat<string> types_target_y = unique(target_y);
-    
     isFitted = true;
+    confusionMatrix();
 }
 #pragma endregion
 

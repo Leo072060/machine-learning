@@ -278,6 +278,8 @@ template<typename T>
 class LogisticRegression : ClassificationModelBase<T>
 {
 public:
+    LogisticRegression() : ClassificationModelBase<T>(),THETAS(this->administrator),LABELS(this->administrator) {}
+public:
     void		  train                (const Mat<T>& x, const Mat<string>& y) override;
 	Mat<string>   predict              (const Mat<T>& x) const                 override;
     Mat<T>        predict_probabilities(const Mat<T>& x) const; 
@@ -290,7 +292,8 @@ public:
 	size_t iterations = 3000;
 private:
 	// calculated value
-	ManagedVal<Mat<T>> THETAS;
+	mutable ManagedVal<Mat<T>> THETAS;
+    mutable ManagedVal<Mat<string>> LABELS;
 };
 
 #pragma region function definition
@@ -305,13 +308,15 @@ void LogisticRegression<T>::train(const Mat<T>& x, const Mat<string>& y)
 		throw invalid_argument("Error: Matrix x and y must have the same number of rows.");
 	if (x.size_row() < 1)
 		throw invalid_argument("Error: Matrix x must have at least one row.");
-    Mat<string> types = unique(y);
-    if(types.size() != 2)  
+    Mat<string> labels = unique(y);
+    if(labels.size() != 2)  
         throw invalid_argument("Error: The target matrix y must contain exactly two unique classes for binary classification.");
 
+    labels.sort_column(0);
+    this->record(LABELS,labels);
     Mat<T> mumerical_y(y.size_row(),y.size_column());
     for(size_t i = 0; i < y.size_row(); ++i)
-        mumerical_y.iloc(i,0) = (types.iloc(0,0) == y.iloc(i,0) ? 0 : 1);
+        mumerical_y.iloc(i,0) = (labels.iloc(0,0) == y.iloc(i,0) ? 0 : 1);
 
     Mat<T> ones(x.size_row(),1);
     ones.fill(1);
@@ -348,6 +353,20 @@ void LogisticRegression<T>::train(const Mat<T>& x, const Mat<string>& y)
     }
     this->record(THETAS,thetas);
     
+}
+template<typename T> 
+Mat<string> LogisticRegression<T>::predict(const Mat<T>& x) const
+{   
+    Mat<T> probabilities = predict_probabilities(x);
+    Mat<string> ret(x.size_row(),1);
+    for(size_t i = 0; i < x.size_row(); ++i)
+        ret.iloc(i,0) = probabilities.iloc(i,0)>0.5?LABELS.read().iloc(0,0):LABELS.read().iloc(0,1);
+    return ret;
+}
+template<typename T> 
+Mat<T> LogisticRegression<T>::predict_probabilities(const Mat<T>& x) const
+{
+    return LogisticRegression<T>::predict_probabilities(x,THETAS);
 }
 #pragma endregion
 
