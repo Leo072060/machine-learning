@@ -149,7 +149,7 @@ public:
 
 // * * * * * * * functions * * * * * * *
 public:
-    void fit(const Mat<string>& pred_y, const Mat<string>& target_y) { const_cast<const RegressionEvaluation<T>*>(this)->fit(pred_y, target_y); }
+    void fit(const Mat<string>& pred_y, const Mat<string>& target_y) { const_cast<const ClassificationEvaluation<T>*>(this)->fit(pred_y, target_y); }
     void report()            const;
     Mat<size_t> confusionMatrix() const;
     T           accuracy()        const;
@@ -173,6 +173,7 @@ private:
 #pragma region lifecycle management
 template<typename T>
 ClassificationEvaluation<T>::ClassificationEvaluation():ManagedClass(),
+                                TARGET_Y(this->administrator),PRED_Y(this->administrator),
                                 CONFUSION_MATRIX(this->administrator),
                                 ACCURACY(this->administrator),
                                 ERROR_RATE(this->administrator),
@@ -198,9 +199,9 @@ void ClassificationEvaluation<T>::report() const
     cout<<"accuracy                      "<<"\t"<<accuracy()  <<endl;
     cout<<"error rate                    "<<"\t"<<error_rate()<<endl;
     cout<<"percision : "<<endl;
-    display(PERCISION.read(),WITH_NAME);
+    display(percision(),WITH_NAME);
     cout<<"recall : "<<endl;
-    display(RECALL.read(),WITH_NAME);
+    display(recall(),WITH_NAME);
 }
 template<typename T>
 Mat<size_t> ClassificationEvaluation<T>::confusionMatrix() const
@@ -216,8 +217,8 @@ Mat<size_t> ClassificationEvaluation<T>::confusionMatrix() const
     Mat<size_t> confusionMat(types_target_y.size_column(),types_target_y.size_column());
     for(size_t i = 0; i < TARGET_Y.read().size_row(); ++i)
     {
-        confusionMat.iloc(find(types_target_y,TARGET_Y.read().iloc(i,0)).iloc(0,1),
-                          find(types_target_y,PRED_Y.read().iloc(i,0)).iloc(0,1)) += 1;
+        confusionMat.iloc(types_target_y.find(TARGET_Y.read().iloc(i,0)).iloc(0,1),
+                          types_target_y.find(PRED_Y.read().iloc(i,0)).iloc(0,1)) += 1;
     }
     for(size_t i = 0; i < confusionMat.size_row(); ++i)
     {
@@ -233,11 +234,11 @@ T ClassificationEvaluation<T>::accuracy() const
     if(!isFitted) throw runtime_error("Error: The model must be fitted before generating accuracy.");
     if(ACCURACY.readable()) return ACCURACY.read();
 
-    T sum = sum(CONFUSION_MATRIX.read());
+    T sum_TFPN = sum(CONFUSION_MATRIX.read());
     T sum_TP_TN = 0;
     for(size_t i = 0; i < CONFUSION_MATRIX.read().size_row(); ++i)
         sum_TP_TN += CONFUSION_MATRIX.read().iloc(i,i);
-    this->record(ACCURACY,sum_TP_TN/sum);
+    this->record(ACCURACY,sum_TP_TN/sum_TFPN);
     return ACCURACY.read();
 }
 template<typename T>
@@ -245,9 +246,8 @@ T ClassificationEvaluation<T>::error_rate() const
 {
     if(!isFitted) throw runtime_error("Error: The model must be fitted before generating error rate.");
     if(ERROR_RATE.readable()) return ERROR_RATE.read();
-
     this->record(ERROR_RATE,1-accuracy());
-    ERROR_RATE.read();
+    return ERROR_RATE.read();
 }
 template<typename T>
 Mat<T> ClassificationEvaluation<T>::percision() const
@@ -255,11 +255,11 @@ Mat<T> ClassificationEvaluation<T>::percision() const
     if(!isFitted) throw runtime_error("Error: The model must be fitted before generating percision.");
     if(PERCISION.readable()) return PERCISION.read();
 
-    Mat<T> sum_TP_FP = sum_column(CONFUSION_MATRIX.read());
-    Mat<T> ret(1,CONFUSION_MATRIX.read().size_row());
-    for(size_t i = 0; i < ret.size_row(); ++i)
+    Mat<size_t> sum_TP_FP = sum_row(CONFUSION_MATRIX.read());
+    Mat<T> ret(1,CONFUSION_MATRIX.read().size_column());
+    for(size_t i = 0; i < ret.size_column(); ++i)
     {
-        ret.iloc(0,i) = CONFUSION_MATRIX.read().iloc(i,i)/sum_TP_FP.iloc(i,0);
+        ret.iloc(0,i) = CONFUSION_MATRIX.read().iloc(i,i)*1.0/sum_TP_FP.iloc(i,0);
         ret.iloc_colName(i) = CONFUSION_MATRIX.read().iloc_colName(i);
     }
     ret.iloc_rowName(0) = "percision";
@@ -273,11 +273,11 @@ Mat<T> ClassificationEvaluation<T>::recall() const
     if(!isFitted) throw runtime_error("Error: The model must be fitted before generating recall.");
     if(RECALL.readable()) return RECALL.read();
 
-    Mat<T> sum_TP_FP = sum_row(CONFUSION_MATRIX.read());
-    Mat<T> ret(1,CONFUSION_MATRIX.read().size_row());
-    for(size_t i = 0; i < ret.size_row(); ++i)
+    Mat<size_t> sum_TP_FP = sum_column(CONFUSION_MATRIX.read());
+    Mat<T> ret(1,CONFUSION_MATRIX.read().size_column());
+    for(size_t i = 0; i < ret.size_column(); ++i)
     {
-        ret.iloc(0,i) = CONFUSION_MATRIX.read().iloc(i,i)/sum_TP_FP.iloc(i,0);
+        ret.iloc(0,i) = CONFUSION_MATRIX.read().iloc(i,i)*1.0/sum_TP_FP.iloc(0,i);
         ret.iloc_colName(i) = CONFUSION_MATRIX.read().iloc_colName(i);
     }
     ret.iloc_rowName(0) = "recall";

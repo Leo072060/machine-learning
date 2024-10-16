@@ -66,12 +66,17 @@ int main()
 
     // test LogisticRegression
     #ifdef TEST_LogisticRegression
-    auto train_x = binary_classiffication_data.extract_rows(0,data.size_row()*0.7);
-    auto train_y = labels_binary_classiffication_data.extract_rows(0,data.size_row()*0.7);
-    auto test_x = binary_classiffication_data.extract_rows(data.size_row()*0.7,binary_classiffication_data.size_row());
-    auto test_y = labels_binary_classiffication_data.extract_rows(data.size_row()*0.7,binary_classiffication_data.size_row());
+    auto train_x = binary_classiffication_data.extract_rows(0, binary_classiffication_data.size_row()*0.7);
+    auto train_y = labels_binary_classiffication_data.extract_rows(0, binary_classiffication_data.size_row()*0.7);
+    auto test_x = binary_classiffication_data.extract_rows(binary_classiffication_data.size_row()*0.7,binary_classiffication_data.size_row());
+    auto test_y = labels_binary_classiffication_data.extract_rows(binary_classiffication_data.size_row()*0.7,binary_classiffication_data.size_row());
     LogisticRegression<double> model;
     model.train(train_x,train_y);
+    Mat<string> pred_y = model.predict(test_x);
+    display_rainbow(concat_horizontal(pred_y, test_y));
+    ClassificationEvaluation<double> classificationEvalution;
+    classificationEvalution.fit(pred_y, test_y);
+    classificationEvalution.report();
 
     #endif
 

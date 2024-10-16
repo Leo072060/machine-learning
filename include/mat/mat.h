@@ -64,8 +64,6 @@ template<typename T> Mat<T>       concat_vertical  (const Mat<T>& top, const Mat
 
 template<typename T> Mat<T>       unique           (const Mat<T>& mat);
 
-template<typename T> Mat<size_t>  find             (const Mat<T>& mat, T val);
-
 template<typename T> void         display          (const Mat<T>& mat, WITH_WHICH_NAME withWhichName = WITHOUT_NAME);
 template<typename T> void         display_rainbow  (const Mat<T>& mat, WITH_WHICH_NAME withWhichName = WITHOUT_NAME);
 
@@ -152,6 +150,8 @@ public:
 
     void          sort_row         (const size_t i, ORDER order = ASCE);
     void          sort_column      (const size_t i, ORDER order = ASCE);
+
+    Mat<size_t>   find             (const T val)                                  const;
 private:
 	T*			  operator[]	   (const size_t i)		                                { return data[i]; }
 	const T*const operator[]	   (const size_t i)						          const { return data[i]; }
@@ -709,6 +709,23 @@ void Mat<T>::sort_column(const size_t i, const ORDER order)
     delete[] data;     data = new_data;
     delete[] rowNames; rowNames = new_rowNames;
 }
+template<typename T> 
+Mat<size_t> Mat<T>::find(const T val) const
+{
+    for(size_t i = 0; i <rowSize; ++i)
+        for(size_t j = 0; j < colSize; ++j)
+        {
+            if(data[i][j] == val)
+            {
+                Mat<size_t> ret(1,2);
+                ret.iloc(0,0) = i;
+                ret.iloc(0,1) = j;
+                return ret;
+            }
+        }
+    Mat<size_t> ret(0,0);
+    return ret;
+}   
 #pragma endregion
 
 #pragma region non-member functions
@@ -1027,24 +1044,6 @@ Mat<T> unique(const Mat<T>& mat)
         ret.iloc(0,i++) = e;
     return ret;
 }
-
-template<typename T> 
-Mat<size_t> find(const Mat<T>& mat, T val)
-{
-    for(size_t i = 0; i < mat.size_row(); ++i)
-        for(size_t j = 0; j < mat.size_column(); ++i)
-        {
-            if(mat.iloc(i,j) == val)
-            {
-                Mat<size_t> ret(1,2);
-                ret.iloc(0,0) = i;
-                ret.iloc(0,1) = j;
-                return ret;
-            }
-        }
-    Mat<size_t> ret(0,0);
-    return ret;
-}   
 
 template<typename T>
 void display(const Mat<T>& mat, WITH_WHICH_NAME withWhichName)

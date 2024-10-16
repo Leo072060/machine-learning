@@ -288,7 +288,7 @@ public:
 public:
 	// model parameters
 	double learning_rate = 0.0003;
-	size_t batch_size = 100;
+	size_t batch_size = 70;
 	size_t iterations = 3000;
 private:
 	// calculated value
@@ -316,7 +316,7 @@ void LogisticRegression<T>::train(const Mat<T>& x, const Mat<string>& y)
     this->record(LABELS,labels);
     Mat<T> mumerical_y(y.size_row(),y.size_column());
     for(size_t i = 0; i < y.size_row(); ++i)
-        mumerical_y.iloc(i,0) = (labels.iloc(0,0) == y.iloc(i,0) ? 0 : 1);
+        mumerical_y.iloc(i,0) = (labels.iloc(0,0) == y.iloc(i,0) ? 1 : 0);
 
     Mat<T> ones(x.size_row(),1);
     ones.fill(1);
@@ -344,7 +344,7 @@ void LogisticRegression<T>::train(const Mat<T>& x, const Mat<string>& y)
         T tmp_theta_i = 0;
         for(auto& e:randomNums)
         {
-            tmp_theta_i += learning_rate*((mumerical_y.iloc_row(e) - LogisticRegression<T>::predict_probabilities(transpose(w.iloc_row(e)),thetas)) * w.iloc(e,i)).iloc(0,0);
+            tmp_theta_i += learning_rate*((mumerical_y.iloc_row(e) - LogisticRegression<T>::predict_probabilities(x.iloc_row(e),thetas)) * w.iloc(e,i)).iloc(0,0);
         }
         tmp_thetas.iloc(0,i) += (tmp_theta_i);
     }
