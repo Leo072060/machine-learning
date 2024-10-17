@@ -223,27 +223,7 @@ CMakeFiles/ML.dir/src/main.cpp.o: ../src/main.cpp \
   /usr/include/c++/11/bits/fs_dir.h \
   /usr/include/c++/11/bits/fs_ops.h \
   /usr/include/c++/11/bitset \
-  ../include/kits/loader.h \
-  /usr/include/c++/11/fstream \
-  /usr/include/x86_64-linux-gnu/c++/11/bits/basic_file.h \
-  /usr/include/x86_64-linux-gnu/c++/11/bits/c++io.h \
-  /usr/include/c++/11/bits/fstream.tcc \
-  ../include/mat/mat.h \
-  /usr/include/c++/11/functional \
-  /usr/include/c++/11/bits/std_function.h \
-  /usr/include/c++/11/unordered_map \
-  /usr/include/c++/11/bits/hashtable.h \
-  /usr/include/c++/11/bits/hashtable_policy.h \
-  /usr/include/c++/11/bits/enable_special_members.h \
-  /usr/include/c++/11/bits/node_handle.h \
-  /usr/include/c++/11/bits/unordered_map.h \
-  /usr/include/c++/11/bits/erase_if.h \
-  /usr/include/c++/11/bits/stl_algo.h \
-  /usr/include/c++/11/bits/algorithmfwd.h \
-  /usr/include/c++/11/bits/stl_heap.h \
-  /usr/include/c++/11/bits/stl_tempbuf.h \
-  /usr/include/c++/11/bits/uniform_int_dist.h \
-  /usr/include/c++/11/math.h \
+  /usr/include/c++/11/random \
   /usr/include/c++/11/cmath \
   /usr/include/math.h \
   /usr/include/x86_64-linux-gnu/bits/math-vector.h \
@@ -268,6 +248,35 @@ CMakeFiles/ML.dir/src/main.cpp.o: ../src/main.cpp \
   /usr/include/c++/11/tr1/poly_hermite.tcc \
   /usr/include/c++/11/tr1/poly_laguerre.tcc \
   /usr/include/c++/11/tr1/riemann_zeta.tcc \
+  /usr/include/c++/11/bits/random.h \
+  /usr/include/c++/11/bits/uniform_int_dist.h \
+  /usr/include/x86_64-linux-gnu/c++/11/bits/opt_random.h \
+  /usr/include/c++/11/bits/random.tcc \
+  /usr/include/c++/11/numeric \
+  /usr/include/c++/11/bits/stl_numeric.h \
+  /usr/include/c++/11/bit \
+  /usr/include/c++/11/pstl/glue_numeric_defs.h \
+  /usr/include/c++/11/pstl/execution_defs.h \
+  ../include/kits/loader.h \
+  /usr/include/c++/11/fstream \
+  /usr/include/x86_64-linux-gnu/c++/11/bits/basic_file.h \
+  /usr/include/x86_64-linux-gnu/c++/11/bits/c++io.h \
+  /usr/include/c++/11/bits/fstream.tcc \
+  ../include/mat/mat.h \
+  /usr/include/c++/11/functional \
+  /usr/include/c++/11/bits/std_function.h \
+  /usr/include/c++/11/unordered_map \
+  /usr/include/c++/11/bits/hashtable.h \
+  /usr/include/c++/11/bits/hashtable_policy.h \
+  /usr/include/c++/11/bits/enable_special_members.h \
+  /usr/include/c++/11/bits/node_handle.h \
+  /usr/include/c++/11/bits/unordered_map.h \
+  /usr/include/c++/11/bits/erase_if.h \
+  /usr/include/c++/11/bits/stl_algo.h \
+  /usr/include/c++/11/bits/algorithmfwd.h \
+  /usr/include/c++/11/bits/stl_heap.h \
+  /usr/include/c++/11/bits/stl_tempbuf.h \
+  /usr/include/c++/11/math.h \
   /usr/include/c++/11/set \
   /usr/include/c++/11/bits/stl_tree.h \
   /usr/include/c++/11/bits/stl_set.h \
@@ -280,24 +289,19 @@ CMakeFiles/ML.dir/src/main.cpp.o: ../src/main.cpp \
   /usr/include/c++/11/memory \
   /usr/include/c++/11/bits/stl_raw_storage_iter.h \
   /usr/include/c++/11/bits/align.h \
-  /usr/include/c++/11/bit \
   /usr/include/c++/11/bits/shared_ptr_atomic.h \
   /usr/include/c++/11/bits/atomic_base.h \
   /usr/include/c++/11/bits/atomic_lockfree_defines.h \
   /usr/include/c++/11/backward/auto_ptr.h \
   /usr/include/c++/11/pstl/glue_memory_defs.h \
-  /usr/include/c++/11/pstl/execution_defs.h \
   ../include/ML/linearModel.h \
-  /usr/include/c++/11/random \
-  /usr/include/c++/11/bits/random.h \
-  /usr/include/x86_64-linux-gnu/c++/11/bits/opt_random.h \
-  /usr/include/c++/11/bits/random.tcc \
-  /usr/include/c++/11/numeric \
-  /usr/include/c++/11/bits/stl_numeric.h \
-  /usr/include/c++/11/pstl/glue_numeric_defs.h \
   ../include/ML/modelBase.h \
-  ../include/math/numerical_optimization.h \
-  ../include/ML/evaluation.h
+  ../include/preprocessor/numerical_optimization.h \
+  ../include/ML/evaluation.h \
+  ../include/ML/binaryToMultiClassification.h \
+  /usr/include/c++/11/algorithm \
+  /usr/include/c++/11/pstl/glue_algorithm_defs.h \
+  ../include/ML/modelBase.h
 
 CMakeFiles/ML.dir/src/managed.cpp.o: ../src/managed.cpp \
   /usr/include/stdc-predef.h \
@@ -488,17 +492,13 @@ CMakeFiles/ML.dir/src/managed.cpp.o: ../src/managed.cpp \
   /usr/include/c++/11/bits/vector.tcc
 
 
+/usr/include/c++/11/algorithm:
+
+../include/ML/binaryToMultiClassification.h:
+
 ../include/ML/evaluation.h:
 
-../include/math/numerical_optimization.h:
-
-/usr/include/c++/11/bits/stl_numeric.h:
-
-/usr/include/c++/11/numeric:
-
-/usr/include/c++/11/bits/random.h:
-
-/usr/include/c++/11/random:
+../include/preprocessor/numerical_optimization.h:
 
 /usr/include/c++/11/pstl/glue_memory_defs.h:
 
@@ -509,8 +509,6 @@ CMakeFiles/ML.dir/src/managed.cpp.o: ../src/managed.cpp \
 /usr/include/c++/11/bits/atomic_base.h:
 
 /usr/include/c++/11/bits/shared_ptr_atomic.h:
-
-/usr/include/c++/11/bit:
 
 /usr/include/c++/11/bits/align.h:
 
@@ -536,25 +534,37 @@ CMakeFiles/ML.dir/src/managed.cpp.o: ../src/managed.cpp \
 
 /usr/include/c++/11/set:
 
-/usr/include/c++/11/tr1/riemann_zeta.tcc:
+/usr/include/c++/11/math.h:
 
-/usr/include/c++/11/tr1/poly_laguerre.tcc:
+/usr/include/c++/11/bits/stl_algo.h:
 
-/usr/include/c++/11/tr1/poly_hermite.tcc:
+/usr/include/c++/11/bits/unordered_map.h:
 
-/usr/include/c++/11/tr1/modified_bessel_func.tcc:
+/usr/include/c++/11/bits/hashtable_policy.h:
 
-/usr/include/c++/11/tr1/hypergeometric.tcc:
+/usr/include/c++/11/bits/hashtable.h:
+
+/usr/include/c++/11/unordered_map:
+
+/usr/include/c++/11/bits/stl_tempbuf.h:
+
+/usr/include/c++/11/bits/std_function.h:
+
+../include/ML/modelBase.h:
+
+../include/mat/mat.h:
+
+/usr/include/c++/11/bits/fstream.tcc:
+
+/usr/include/x86_64-linux-gnu/c++/11/bits/c++io.h:
+
+/usr/include/x86_64-linux-gnu/c++/11/bits/basic_file.h:
+
+/usr/include/c++/11/fstream:
 
 /usr/include/c++/11/tr1/exp_integral.tcc:
 
-/usr/include/c++/11/tr1/ell_integral.tcc:
-
-/usr/include/c++/11/tr1/bessel_function.tcc:
-
 /usr/include/c++/11/bits/cxxabi_forced.h:
-
-/usr/include/c++/11/fstream:
 
 /usr/include/x86_64-linux-gnu/bits/endian.h:
 
@@ -569,6 +579,8 @@ CMakeFiles/ML.dir/src/managed.cpp.o: ../src/managed.cpp \
 /usr/include/x86_64-linux-gnu/bits/types/__fpos64_t.h:
 
 /usr/include/x86_64-linux-gnu/bits/struct_rwlock.h:
+
+/usr/include/c++/11/numeric:
 
 /usr/include/c++/11/bits/basic_string.h:
 
@@ -604,10 +616,6 @@ CMakeFiles/ML.dir/src/managed.cpp.o: ../src/managed.cpp \
 
 /usr/include/c++/11/ext/concurrence.h:
 
-../include/ML/modelBase.h:
-
-../include/mat/mat.h:
-
 /usr/include/c++/11/bits/ios_base.h:
 
 /usr/include/x86_64-linux-gnu/bits/fp-logb.h:
@@ -616,9 +624,7 @@ CMakeFiles/ML.dir/src/managed.cpp.o: ../src/managed.cpp \
 
 /usr/include/libintl.h:
 
-/usr/include/c++/11/pstl/glue_numeric_defs.h:
-
-/usr/include/x86_64-linux-gnu/bits/locale.h:
+/usr/include/c++/11/tr1/modified_bessel_func.tcc:
 
 /usr/include/locale.h:
 
@@ -626,21 +632,19 @@ CMakeFiles/ML.dir/src/managed.cpp.o: ../src/managed.cpp \
 
 /usr/include/c++/11/bits/localefwd.h:
 
+/usr/include/c++/11/tr1/hypergeometric.tcc:
+
 /usr/include/x86_64-linux-gnu/sys/select.h:
 
 /usr/include/c++/11/iomanip:
 
 /usr/include/c++/11/cctype:
 
-/usr/include/c++/11/unordered_map:
-
 /usr/include/x86_64-linux-gnu/bits/stdint-intn.h:
 
 /usr/include/x86_64-linux-gnu/bits/types.h:
 
 /usr/include/x86_64-linux-gnu/bits/atomic_wide_counter.h:
-
-/usr/include/c++/11/bits/unordered_map.h:
 
 /usr/include/c++/11/ext/alloc_traits.h:
 
@@ -692,6 +696,10 @@ CMakeFiles/ML.dir/src/managed.cpp.o: ../src/managed.cpp \
 
 /usr/include/c++/11/tr1/special_function_util.h:
 
+/usr/include/c++/11/functional:
+
+/usr/include/linux/errno.h:
+
 /usr/include/c++/11/bitset:
 
 /usr/include/c++/11/debug/debug.h:
@@ -738,10 +746,6 @@ CMakeFiles/ML.dir/src/managed.cpp.o: ../src/managed.cpp \
 
 /usr/include/asm-generic/errno-base.h:
 
-/usr/include/linux/errno.h:
-
-/usr/include/c++/11/functional:
-
 /usr/include/stdc-predef.h:
 
 /usr/include/c++/11/bits/alloc_traits.h:
@@ -749,6 +753,10 @@ CMakeFiles/ML.dir/src/managed.cpp.o: ../src/managed.cpp \
 ../include/ML/linearModel.h:
 
 /usr/include/x86_64-linux-gnu/bits/types/__locale_t.h:
+
+/usr/include/c++/11/bits/algorithmfwd.h:
+
+/usr/include/c++/11/pstl/execution_defs.h:
 
 /usr/include/x86_64-linux-gnu/bits/types/locale_t.h:
 
@@ -761,12 +769,6 @@ CMakeFiles/ML.dir/src/managed.cpp.o: ../src/managed.cpp \
 /usr/include/x86_64-linux-gnu/bits/types/__fpos_t.h:
 
 /usr/include/c++/11/bits/ostream_insert.h:
-
-/usr/include/c++/11/tr1/legendre_function.tcc:
-
-/usr/include/x86_64-linux-gnu/bits/pthread_stack_min-dynamic.h:
-
-/usr/include/x86_64-linux-gnu/c++/11/bits/c++config.h:
 
 /usr/include/c++/11/ostream:
 
@@ -794,10 +796,6 @@ CMakeFiles/ML.dir/src/managed.cpp.o: ../src/managed.cpp \
 
 /usr/include/x86_64-linux-gnu/bits/types/clock_t.h:
 
-/usr/include/c++/11/bits/std_function.h:
-
-/usr/include/c++/11/bits/stl_tempbuf.h:
-
 /usr/include/x86_64-linux-gnu/bits/stdint-uintn.h:
 
 /usr/include/x86_64-linux-gnu/bits/types/struct_timespec.h:
@@ -806,11 +804,19 @@ CMakeFiles/ML.dir/src/managed.cpp.o: ../src/managed.cpp \
 
 /usr/include/c++/11/cstdlib:
 
+/usr/include/c++/11/tr1/poly_laguerre.tcc:
+
+/usr/include/c++/11/bit:
+
 /usr/include/x86_64-linux-gnu/bits/floatn.h:
 
 /usr/include/c++/11/bits/range_access.h:
 
 /usr/include/x86_64-linux-gnu/bits/wchar.h:
+
+/usr/include/x86_64-linux-gnu/bits/locale.h:
+
+/usr/include/c++/11/pstl/glue_numeric_defs.h:
 
 /usr/include/c++/11/bits/exception_ptr.h:
 
@@ -864,7 +870,13 @@ CMakeFiles/ML.dir/src/managed.cpp.o: ../src/managed.cpp \
 
 /usr/include/x86_64-linux-gnu/bits/waitflags.h:
 
-/usr/include/c++/11/math.h:
+/usr/include/c++/11/bits/erase_if.h:
+
+/usr/include/c++/11/bits/ptr_traits.h:
+
+/usr/include/stdint.h:
+
+/usr/include/endian.h:
 
 /usr/include/x86_64-linux-gnu/sys/types.h:
 
@@ -887,6 +899,10 @@ CMakeFiles/ML.dir/src/managed.cpp.o: ../src/managed.cpp \
 /usr/include/x86_64-linux-gnu/bits/stdlib-float.h:
 
 /usr/include/alloca.h:
+
+/usr/include/c++/11/bits/stl_heap.h:
+
+/usr/include/c++/11/bits/std_abs.h:
 
 /usr/include/c++/11/cstdio:
 
@@ -916,6 +932,8 @@ CMakeFiles/ML.dir/src/managed.cpp.o: ../src/managed.cpp \
 
 /usr/include/asm-generic/errno.h:
 
+/usr/include/c++/11/tr1/ell_integral.tcc:
+
 /usr/include/x86_64-linux-gnu/bits/types/error_t.h:
 
 /usr/include/x86_64-linux-gnu/bits/mathcalls-helper-functions.h:
@@ -926,9 +944,9 @@ CMakeFiles/ML.dir/src/managed.cpp.o: ../src/managed.cpp \
 
 /usr/include/c++/11/bits/locale_classes.tcc:
 
-/usr/include/c++/11/iostream:
-
 /usr/include/c++/11/bits/node_handle.h:
+
+/usr/include/c++/11/iostream:
 
 /usr/include/x86_64-linux-gnu/bits/fp-fast.h:
 
@@ -942,11 +960,15 @@ CMakeFiles/ML.dir/src/managed.cpp.o: ../src/managed.cpp \
 
 /usr/include/x86_64-linux-gnu/c++/11/bits/error_constants.h:
 
+/usr/include/c++/11/pstl/glue_algorithm_defs.h:
+
 /usr/include/c++/11/stdexcept:
 
 /usr/include/c++/11/codecvt:
 
 /usr/include/c++/11/bits/streambuf.tcc:
+
+/usr/include/c++/11/tr1/bessel_function.tcc:
 
 /usr/include/c++/11/bits/uniform_int_dist.h:
 
@@ -956,11 +978,15 @@ CMakeFiles/ML.dir/src/managed.cpp.o: ../src/managed.cpp \
 
 /usr/include/c++/11/bits/locale_facets.h:
 
+/usr/include/c++/11/tr1/poly_hermite.tcc:
+
 /usr/include/c++/11/cwctype:
 
 /usr/include/c++/11/bits/streambuf_iterator.h:
 
 /usr/include/x86_64-linux-gnu/c++/11/bits/ctype_inline.h:
+
+/usr/include/c++/11/random:
 
 /usr/include/x86_64-linux-gnu/bits/types/struct_tm.h:
 
@@ -973,6 +999,8 @@ CMakeFiles/ML.dir/src/managed.cpp.o: ../src/managed.cpp \
 /usr/include/c++/11/vector:
 
 /usr/include/c++/11/bits/stl_uninitialized.h:
+
+/usr/include/c++/11/bits/stl_numeric.h:
 
 /usr/include/c++/11/bits/vector.tcc:
 
@@ -1004,10 +1032,6 @@ CMakeFiles/ML.dir/src/managed.cpp.o: ../src/managed.cpp \
 
 /usr/include/c++/11/bits/locale_conv.h:
 
-/usr/include/c++/11/tr1/beta_function.tcc:
-
-/usr/include/c++/11/array:
-
 /usr/include/c++/11/bits/uses_allocator.h:
 
 /usr/include/c++/11/bits/quoted_string.h:
@@ -1022,49 +1046,13 @@ CMakeFiles/ML.dir/src/managed.cpp.o: ../src/managed.cpp \
 
 /usr/include/c++/11/bits/fs_ops.h:
 
-/usr/include/c++/11/cmath:
+/usr/include/x86_64-linux-gnu/bits/pthread_stack_min-dynamic.h:
 
-/usr/include/c++/11/bits/allocator.h:
+/usr/include/x86_64-linux-gnu/c++/11/bits/c++config.h:
 
-../include/kits/loader.h:
-
-/usr/include/c++/11/bits/fstream.tcc:
-
-/usr/include/x86_64-linux-gnu/c++/11/bits/basic_file.h:
-
-/usr/include/x86_64-linux-gnu/c++/11/bits/c++io.h:
-
-/usr/include/c++/11/bits/hashtable.h:
-
-/usr/include/c++/11/bits/hashtable_policy.h:
-
-/usr/include/x86_64-linux-gnu/c++/11/bits/opt_random.h:
-
-/usr/include/c++/11/bits/codecvt.h:
-
-/usr/include/c++/11/bits/basic_ios.tcc:
-
-/usr/include/c++/11/bits/enable_special_members.h:
-
-/usr/include/c++/11/bits/ptr_traits.h:
-
-/usr/include/stdint.h:
-
-/usr/include/endian.h:
-
-/usr/include/c++/11/bits/erase_if.h:
-
-/usr/include/c++/11/bits/stl_algo.h:
+/usr/include/c++/11/tr1/legendre_function.tcc:
 
 /usr/include/x86_64-linux-gnu/bits/math-vector.h:
-
-/usr/include/c++/11/pstl/execution_defs.h:
-
-/usr/include/c++/11/bits/algorithmfwd.h:
-
-/usr/include/c++/11/bits/std_abs.h:
-
-/usr/include/c++/11/bits/stl_heap.h:
 
 /usr/lib/gcc/x86_64-linux-gnu/11/include/stddef.h:
 
@@ -1076,10 +1064,32 @@ CMakeFiles/ML.dir/src/managed.cpp.o: ../src/managed.cpp \
 
 /usr/include/x86_64-linux-gnu/bits/flt-eval-method.h:
 
+/usr/include/c++/11/bits/enable_special_members.h:
+
+/usr/include/c++/11/bits/codecvt.h:
+
+/usr/include/c++/11/bits/basic_ios.tcc:
+
+/usr/include/x86_64-linux-gnu/c++/11/bits/opt_random.h:
+
 /usr/include/x86_64-linux-gnu/bits/mathcalls.h:
+
+/usr/include/c++/11/bits/random.h:
 
 /usr/include/c++/11/bits/postypes.h:
 
 /usr/include/x86_64-linux-gnu/bits/mathcalls-narrow.h:
 
 /usr/include/x86_64-linux-gnu/bits/iscanonical.h:
+
+/usr/include/c++/11/array:
+
+/usr/include/c++/11/tr1/beta_function.tcc:
+
+/usr/include/c++/11/tr1/riemann_zeta.tcc:
+
+/usr/include/c++/11/cmath:
+
+/usr/include/c++/11/bits/allocator.h:
+
+../include/kits/loader.h:

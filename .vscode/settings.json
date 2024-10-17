@@ -11,6 +11,18 @@
         "bitset": "cpp",
         "initializer_list": "cpp",
         "utility": "cpp",
-        "streambuf": "cpp"
+        "streambuf": "cpp",
+        "atomic": "cpp",
+        "chrono": "cpp",
+        "vector": "cpp",
+        "exception": "cpp",
+        "random": "cpp",
+        "iosfwd": "cpp",
+        "istream": "cpp",
+        "tuple": "cpp",
+        "type_traits": "cpp",
+        "algorithm": "cpp",
+        "deque": "cpp",
+        "unordered_map": "cpp"
     }
 }

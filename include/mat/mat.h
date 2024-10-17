@@ -131,6 +131,7 @@ public:
 								    const size_t endRow,   const size_t endCol)   const;
 	Mat<T>		  extract_rows     (const size_t startRow, const size_t endRow)	  const { return extract(startRow, 0, endRow, colSize); }
 	Mat<T>		  extract_columns  (const size_t startCol, const size_t endCol)	  const { return extract(0, startCol, rowSize, endCol); }
+    Mat<T>        extract_rows     (const vector<size_t>& index)                  const;
 	Mat<string>	  extract_rowNames (const size_t startRow, const size_t endRow)   const;
 	Mat<string>	  extract_colNames (const size_t startCol, const size_t endCol)   const;
 	Mat<string>	  extract_rowNames ()										      const { return extract_rowNames(0, rowSize); }
@@ -477,6 +478,16 @@ Mat<T> Mat<T>::extract(const size_t startRow, const size_t startCol, const size_
 	for (size_t j = 0; j < endCol - startCol; ++j)
 		mat.colNames[j] = colNames[j + startCol];
 	return mat;
+}
+template<typename T>
+Mat<T> Mat<T>::extract_rows(const vector<size_t>& index) const
+{
+    Mat<T> ret(index.size(),colSize);
+    int i = 0;
+    for(const auto& e:index)
+        for(size_t j=0; j<colSize;++j)
+            ret.data[i][j]=data[e][j];
+    return ret;
 }
 template<typename T>
 Mat<string>	Mat<T>::extract_rowNames(const size_t startRow, const size_t endRow) const

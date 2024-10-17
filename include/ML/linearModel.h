@@ -12,7 +12,7 @@
 #include"kits/managed.h"
 #include"mat/mat.h"
 #include"kits/dict.h"
-#include"math/numerical_optimization.h"
+#include"preprocessor/numerical_optimization.h"
 
 
 
@@ -24,14 +24,14 @@ template<typename T>
 class SimpleLinearRegression:public RegressionModelBase<T>
 {
 public:
-	SimpleLinearRegression() :RegressionModelBase<T>(),W(this->administrator), B(this->administrator), M(this->administrator) {}
-
+	SimpleLinearRegression() : W(this->administrator), B(this->administrator), M(this->administrator) {}
+    SimpleLinearRegression(const SimpleLinearRegression<T>& other) : SimpleLinearRegression() {}
 // * * * * * * * functions * * * * * * * 
 public:
 	void    train                (const Mat<T>& x, const Mat<T>& y) override; 
 	Mat<T>  predict              (const Mat<T>& x) const            override;
 	T       predict              (const T& x)	   const;
-
+    shared_ptr<RegressionModelBase<T>>  clone() const override{ return make_shared<SimpleLinearRegression<T>>(*this);}
 // * * * * * * * attributes * * * * * * *
 public:
 	// calculated value
@@ -104,11 +104,18 @@ template<typename T>
 class LinearRegression :public RegressionModelBase<T>
 {
 public:
-    LinearRegression():RegressionModelBase<T>(),THETAS(this->administrator){};
+    LinearRegression(): THETAS(this->administrator){};
+    LinearRegression(const LinearRegression<T>& other) : LinearRegression()
+    {
+        learning_rate = other.learning_rate;
+        batch_size = other.learning_rate;
+        iterations = other.iterations;
+    }
 // * * * * * * * functions * * * * * * *
 public:
 	void    train  (const Mat<T>& x, const Mat<T>& y) override;
 	Mat<T>  predict(const Mat<T>& x) const			override;
+    shared_ptr<RegressionModelBase<T>>  clone() const override{ return make_shared<LinearRegression<T>>(*this);}
 // * * * * * * * attributes * * * * * * *
 public:
 	// model parameters
@@ -187,15 +194,21 @@ Mat<T> LinearRegression<T>::predict(const Mat<T>& x) const
 
 
 template<typename T>
-class Log_LinearRegression:public LinearRegression<T>
+class Log_LinearRegression:public RegressionModelBase<T>
 {
 public:
     Log_LinearRegression():RegressionModelBase<T>(),THETAS(this->administrator){};
+    Log_LinearRegression(const Log_LinearRegression<T>& other) :  Log_LinearRegression()
+    {
+        learning_rate = other.learning_rate;
+        batch_size = other.learning_rate;
+        iterations = other.iterations;
+    }
 // * * * * * * * functions * * * * * * *
 public:
 	void    train(const Mat<T>& x, const Mat<T>& y) override;
 	Mat<T>  predict(const Mat<T>& x) const			override;
-
+    shared_ptr<RegressionModelBase<T>>  clone() const override{ return make_shared<Log_LinearRegression<T>>(*this);}
 // * * * * * * * attributes * * * * * * *
 public:
 	// model parameters
@@ -275,16 +288,23 @@ Mat<T> Log_LinearRegression<T>::predict(const Mat<T>& x) const
 
 
 template<typename T>
-class LogisticRegression : ClassificationModelBase<T>
+class LogisticRegression : public ClassificationModelBase<T>
 {
 public:
     LogisticRegression() : ClassificationModelBase<T>(),THETAS(this->administrator),LABELS(this->administrator) {}
+    LogisticRegression(const LogisticRegression<T>& other) : LogisticRegression()
+    {
+        learning_rate = other.learning_rate;
+        batch_size = other.learning_rate;
+        iterations = other.iterations;
+    }
+
 public:
     void		  train                (const Mat<T>& x, const Mat<string>& y) override;
 	Mat<string>   predict              (const Mat<T>& x) const                 override;
     Mat<T>        predict_probabilities(const Mat<T>& x) const; 
     static Mat<T> predict_probabilities(const Mat<T>& x,const Mat<T>& thetas);
-
+    shared_ptr<ClassificationModelBase<T>>  clone() const override{ return make_shared<LogisticRegression<T>>(*this); }
 public:
 	// model parameters
 	double learning_rate = 0.0003;
@@ -342,9 +362,10 @@ void LogisticRegression<T>::train(const Mat<T>& x, const Mat<string>& y)
     for(size_t i = 0; i < w.size_column(); ++i)
     {
         T tmp_theta_i = 0;
+        // gradient descent
         for(auto& e:randomNums)
         {
-            tmp_theta_i += learning_rate*((mumerical_y.iloc_row(e) - LogisticRegression<T>::predict_probabilities(x.iloc_row(e),thetas)) * w.iloc(e,i)).iloc(0,0);
+            tmp_theta_i += learning_rate*((mumerical_y.iloc_row(e) - LogisticRegression<T>::predict_probabilities(x.iloc_row(e),thetas)) * w.iloc(e,i)).iloc(0,0); 
         }
         tmp_thetas.iloc(0,i) += (tmp_theta_i);
     }

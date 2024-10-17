@@ -3,15 +3,17 @@
 #include <filesystem>
 #include <exception>
 #include <bitset>
+#include <random>
 
 #include"kits/loader.h"
 #include"mat/mat.h"
 #include"ML/linearModel.h"
 #include"ML/evaluation.h"
+#include"ML/binaryToMultiClassification.h"
 
 using namespace std;
 
-#define TEST_LogisticRegression
+#define TEST_Multi_LogisticRegression
 
 int main()
 {
@@ -33,9 +35,12 @@ int main()
     loader_binary_classiffication_data.with_which_name = WITH_NAME;
     Mat<double> binary_classiffication_data = loader_binary_classiffication_data.load_matrix(binary_classiffication_dataFileName);
     Mat<string> labels_binary_classiffication_data = binary_classiffication_data.extract_rowNames();
-    display_rainbow(binary_classiffication_data);
-    display_rainbow(labels_binary_classiffication_data);
 
+    string multi_classiffication_dataFileName = "../test/multi_classification_data.csv";
+    csv_Loader<double> loader_multi_classiffication_data;
+    loader_multi_classiffication_data.with_which_name = WITH_NAME;
+    Mat<double> multi_classiffication_data = loader_multi_classiffication_data.load_matrix(multi_classiffication_dataFileName);
+    Mat<string> labels_multi_classiffication_data = multi_classiffication_data.extract_rowNames();
 
     // test void Mat<T>::sort_row(const size_t i, const ORDER order)
     #ifdef TEST_Mat_sort_row
@@ -77,8 +82,20 @@ int main()
     ClassificationEvaluation<double> classificationEvalution;
     classificationEvalution.fit(pred_y, test_y);
     classificationEvalution.report();
-
     #endif
+
+    // test Multi_LogisticRegression
+    #ifdef TEST_Multi_LogisticRegression
+    auto train_x = multi_classiffication_data.extract_rows(0, multi_classiffication_data.size_row()*0.7);
+    auto train_y = labels_multi_classiffication_data.extract_rows(0, multi_classiffication_data.size_row()*0.7);
+    auto test_x = multi_classiffication_data.extract_rows(multi_classiffication_data.size_row()*0.7,multi_classiffication_data.size_row());
+    auto test_y = labels_multi_classiffication_data.extract_rows(multi_classiffication_data.size_row()*0.7,multi_classiffication_data.size_row());
+    MvM_ECOC<double> MvM;
+    LogisticRegression<double> model;
+    MvM.set_binary_classification_model(model);
+    #endif
+
+    cout<<"OK\n";
 
     return 0;
 }
